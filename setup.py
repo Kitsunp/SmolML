@@ -1,4 +1,4 @@
 from setuptools import setup
 
-# Keeping setup.py for compatibility
+# Mantener setup.py para compatibilidad
 setup()

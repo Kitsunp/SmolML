@@ -3,26 +3,26 @@ from smolml.core.value import Value
 
 """
 ///////////////
-/// SCALERS ///
+/// ESCALADORES ///
 ///////////////
 """
 
 class StandardScaler:
     """
-    Standardizes features by removing the mean and scaling to unit variance.
-    Transforms features to have mean=0 and standard deviation=1.
+    Estandariza características removiendo la media y escalando a varianza unitaria.
+    Transforma características para tener media=0 y desviación estándar=1.
     """
     def __init__(self):
         """
-        Initializes scaler with empty mean and standard deviation attributes.
+        Inicializa escalador con atributos de media y desviación estándar vacíos.
         """
         self.mean = None
         self.std = None
         
     def fit(self, X):
         """
-        Computes mean and standard deviation of input features for later scaling.
-        Stores values internally for transform step.
+        Calcula media y desviación estándar de características de entrada para escalado posterior.
+        Almacena valores internamente para el paso de transformación.
         """
         if not isinstance(X, MLArray):
             X = MLArray(X)
@@ -30,12 +30,12 @@ class StandardScaler:
         self.mean = X.mean(axis=0)
         self.std = X.std(axis=0)
         
-        # Handle zero standard deviation
-        if len(X.shape) <= 1:  # Single value or 1D array
+        # Manejar desviación estándar cero
+        if len(X.shape) <= 1:  # Valor único o array 1D
             if isinstance(self.std.data, (int, float)) and self.std.data == 0:
                 self.std = MLArray(1.0)
         else:
-            # Replace zero standard deviations with 1
+            # Reemplazar desviaciones estándar cero con 1
             def replace_zeros(data):
                 if isinstance(data, Value):
                     return Value(1.0) if data.data == 0 else data
@@ -45,8 +45,8 @@ class StandardScaler:
 
     def transform(self, X):
         """
-        Standardizes features using previously computed mean and std.
-        Z-score normalization: z = (x - μ) / σ
+        Estandariza características usando media y std previamente calculadas.
+        Normalización z-score: z = (x - μ) / σ
         """
         if not isinstance(X, MLArray):
             X = MLArray(X)
@@ -54,27 +54,27 @@ class StandardScaler:
     
     def fit_transform(self, X):
         """
-        Convenience method that fits scaler and transforms data in one step.
+        Método de conveniencia que ajusta el escalador y transforma datos en un solo paso.
         """
         self.fit(X)
         return self.transform(X)
 
 class MinMaxScaler:
    """
-   Transforms features by scaling to a fixed range, typically [0, 1].
-   Preserves zero values and handles sparse matrices.
+   Transforma características escalando a un rango fijo, típicamente [0, 1].
+   Preserva valores cero y maneja matrices dispersas.
    """
    def __init__(self):
        """
-       Initializes scaler with empty min and max attributes.
+       Inicializa escalador con atributos de min y max vacíos.
        """
        self.max = None
        self.min = None
 
    def fit(self, X):
        """
-       Computes min and max values of input features for later scaling.
-       Stores values internally for transform step.
+       Calcula valores min y max de características de entrada para escalado posterior.
+       Almacena valores internamente para el paso de transformación.
        """
        if not isinstance(X, MLArray):
            X = MLArray(X)
@@ -83,14 +83,14 @@ class MinMaxScaler:
 
    def transform(self, X):
        """
-       Scales features using previously computed min and max values.
-       MinMax formula: x_scaled = (x - x_min) / (x_max - x_min)
+       Escala características usando valores min y max previamente calculados.
+       Fórmula MinMax: x_escalado = (x - x_min) / (x_max - x_min)
        """
        return (X - self.min) / (self.max - self.min)
 
    def fit_transform(self, X):
        """
-       Convenience method that fits scaler and transforms data in one step.
+       Método de conveniencia que ajusta el escalador y transforma datos en un solo paso.
        """
        self.fit(X)
        return self.transform(X)

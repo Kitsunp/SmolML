@@ -14,7 +14,7 @@ from smolml.models.nn.neural_network import NeuralNetwork
 from smolml.models.nn.layer import DenseLayer
 
 def create_network(optimizer):
-    """Helper function to create a network with specified optimizer"""
+    """Función auxiliar para crear una red con optimizador especificado"""
     input_size = 2
     hidden_size = 32
     output_size = 1
@@ -25,24 +25,24 @@ def create_network(optimizer):
     ], losses.mse_loss, optimizer)
 
 def train_and_get_losses(network, X, y, epochs=100):
-    """Train network and return list of losses"""
+    """Entrenar red y retornar lista de pérdidas"""
     losses = []
     
     for epoch in range(epochs):
-        # Forward pass
+        # Paso hacia adelante
         y_pred = network.forward(X)
         loss = network.loss_function(y_pred, y)
         
-        # Store loss
+        # Almacenar pérdida
         losses.append(loss.data.data)
-        print(f"Epoch: {epoch+1}/{epochs} | Loss: {loss.data.data}")
+        print(f"Época: {epoch+1}/{epochs} | Pérdida: {loss.data.data}")
         
-        # Backward pass and update
+        # Paso hacia atrás y actualización
         loss.backward()
         for idx, layer in enumerate(network.layers):
             layer.update(network.optimizer, idx)
         
-        # Reset gradients
+        # Reiniciar gradientes
         X.restart()
         y.restart()
         for layer in network.layers:
@@ -52,45 +52,45 @@ def train_and_get_losses(network, X, y, epochs=100):
     return losses
 
 def compare_optimizers():
-    # Set random seed for reproducibility
+    # Establecer semilla aleatoria para reproducibilidad
     random.seed(42)
     np.random.seed(42)
 
-    # Create data
+    # Crear datos
     X = MLArray([[0, 0], [0, 1], [1, 0], [1, 1]])
     y = MLArray([[0], [1], [1], [0]])
 
-    # Create networks with different optimizers
+    # Crear redes con diferentes optimizadores
     network_sgd = create_network(optimizers.SGD(learning_rate=0.1))
     network_momentum = create_network(optimizers.SGDMomentum(learning_rate=0.1, momentum_coefficient=0.9))
     network_adagrad = create_network(optimizers.AdaGrad(learning_rate=0.1))
     network_adam = create_network(optimizers.Adam(learning_rate=0.01)) 
 
-    # Train networks
+    # Entrenar redes
     losses_sgd = train_and_get_losses(network_sgd, X, y)
     losses_momentum = train_and_get_losses(network_momentum, X, y)
     losses_adagrad = train_and_get_losses(network_adagrad, X, y)
     losses_adam = train_and_get_losses(network_adam, X, y)
 
-    # Plot results
+    # Graficar resultados
     plt.figure(figsize=(10, 6))
     plt.plot(losses_sgd, label='SGD')
-    plt.plot(losses_momentum, label='SGD with Momentum')
+    plt.plot(losses_momentum, label='SGD con Momentum')
     plt.plot(losses_adagrad, label='AdaGrad')
-    plt.plot(losses_adam, label='Adam', linestyle='--')  # Different line style to distinguish
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.title('Optimizer Comparison')
+    plt.plot(losses_adam, label='Adam', linestyle='--')  # Estilo de línea diferente para distinguir
+    plt.xlabel('Época')
+    plt.ylabel('Pérdida')
+    plt.title('Comparación de Optimizadores')
     plt.legend()
     plt.grid(True)
-    plt.yscale('log')  # Log scale helps visualize convergence differences
+    plt.yscale('log')  # Escala log ayuda a visualizar diferencias de convergencia
     plt.show()
 
-    # Print final losses
-    print(f"Final loss SGD: {losses_sgd[-1]:.6f}")
-    print(f"Final loss SGD with Momentum: {losses_momentum[-1]:.6f}")
-    print(f"Final loss AdaGrad: {losses_adagrad[-1]:.6f}")
-    print(f"Final loss Adam: {losses_adam[-1]:.6f}")
+    # Imprimir pérdidas finales
+    print(f"Pérdida final SGD: {losses_sgd[-1]:.6f}")
+    print(f"Pérdida final SGD con Momentum: {losses_momentum[-1]:.6f}")
+    print(f"Pérdida final AdaGrad: {losses_adagrad[-1]:.6f}")
+    print(f"Pérdida final Adam: {losses_adam[-1]:.6f}")
 
 if __name__ == '__main__':
     compare_optimizers()

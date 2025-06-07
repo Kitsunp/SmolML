@@ -5,28 +5,28 @@ import math
 /// VALUE ///
 /////////////
 
-Neural network library for automatic differentiation and gradient computation.
-Based on amazing work by karpathy (https://github.com/karpathy/micrograd).
+Librería de redes neuronales para diferenciación automática y cómputo de gradientes.
+Basada en el increíble trabajo de karpathy (https://github.com/karpathy/micrograd).
 """
 class Value:
     """
-    Stores a single scalar value and its gradient for automatic differentiation.
-    Implements backpropagation through a computational graph of Value objects.
+    Almacena un único valor escalar y su gradiente para diferenciación automática.
+    Implementa retropropagación a través de un grafo computacional de objetos Value.
     """
     def __init__(self, data, _children=(), _op=""):
         """
-        Initializes a Value with data and optional gradient computation information.
-        Stores children nodes and operation for building computational graph.
+        Inicializa un Value con datos e información opcional de cómputo de gradientes.
+        Almacena nodos hijos y operación para construir el grafo computacional.
         """
         self.data = data
-        self.grad = 0  # Derivative of final output with respect to this value
-        self._backward = lambda: None  # Function to compute gradients
-        self._prev = set(_children)  # Child nodes in computational graph  
-        self._op = _op  # Operation that created this value
+        self.grad = 0  # Derivada de la salida final con respecto a este valor
+        self._backward = lambda: None  # Función para calcular gradientes
+        self._prev = set(_children)  # Nodos hijos en el grafo computacional  
+        self._op = _op  # Operación que creó este valor
 
     def __add__(self, other):
         """
-        Adds two Values and sets up gradient computation for backpropagation.
+        Suma dos Values y configura el cómputo de gradientes para retropropagación.
         """
         other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data + other.data, (self, other), "+")
@@ -38,8 +38,8 @@ class Value:
 
     def __mul__(self, other):
         """
-        Multiplies two Values and sets up gradient computation for backpropagation.
-        Uses product rule for derivatives.
+        Multiplica dos Values y configura el cómputo de gradientes para retropropagación.
+        Usa la regla del producto para las derivadas.
         """ 
         other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data * other.data, (self, other), "*")
@@ -51,11 +51,11 @@ class Value:
 
     def __pow__(self, other):
         """
-        Raises Value to a power and sets up gradient computation.
-        Currently only supports int/float powers.
+        Eleva Value a una potencia y configura el cómputo de gradientes.
+        Actualmente solo soporta potencias int/float.
         """
         other = other.data if isinstance(other, Value) else other
-        assert isinstance(other, (int, float)), "only supporting int/float/value powers for now"
+        assert isinstance(other, (int, float)), "solo se soportan potencias int/float/value por ahora"
         out = Value(self.data**other, (self,), f"**{other}")
         def _backward():
             self.grad += (other * self.data ** (other - 1)) * out.grad
@@ -64,8 +64,8 @@ class Value:
 
     def __abs__(self):
         """
-        Computes absolute value and sets up gradient computation.
-        Derivative is 1 for positive values, -1 for negative values.
+        Calcula el valor absoluto y configura el cómputo de gradientes.
+        La derivada es 1 para valores positivos, -1 para valores negativos.
         """
         out = Value(abs(self.data), (self,), "abs")
         def _backward():
@@ -75,11 +75,11 @@ class Value:
 
     def __truediv__(self, other):
         """
-        Implements division with special handling for division by zero.
-        Returns 0 when dividing by 0 or very small numbers.
+        Implementa división con manejo especial para división por cero.
+        Retorna 0 cuando se divide por 0 o números muy pequeños.
         """
         other = other if isinstance(other, Value) else Value(other)
-        if abs(other.data) < 1e-10:  # Division by zero or very small number
+        if abs(other.data) < 1e-10:  # División por cero o número muy pequeño
             out = Value(0.0, (self, other), "/")
             def _backward():
                 self.grad += 0.0
@@ -90,9 +90,9 @@ class Value:
 
     def __rtruediv__(self, other):
         """
-        Implements reverse division (other / self) with zero handling.
+        Implementa división inversa (other / self) con manejo de ceros.
         """
-        if abs(self.data) < 1e-10:  # Division by zero or very small number
+        if abs(self.data) < 1e-10:  # División por cero o número muy pequeño
             out = Value(0.0, (self,), "r/")
             def _backward():
                 self.grad += 0.0
@@ -102,8 +102,8 @@ class Value:
 
     def exp(self):
         """
-        Computes exponential (e^x) and sets up gradient computation.
-        Derivative of e^x is e^x.
+        Calcula el exponencial (e^x) y configura el cómputo de gradientes.
+        La derivada de e^x es e^x.
         """
         x = self.data
         out = Value(math.exp(x), (self,), "exp")
@@ -114,10 +114,10 @@ class Value:
 
     def log(self):
         """
-        Computes natural logarithm (ln) and sets up gradient computation.
-        Derivative of ln(x) is 1/x.
+        Calcula el logaritmo natural (ln) y configura el cómputo de gradientes.
+        La derivada de ln(x) es 1/x.
         """
-        assert self.data > 0, "log is only defined for positive numbers"
+        assert self.data > 0, "log solo está definido para números positivos"
         x = self.data
         out = Value(math.log(x), (self,), "log")
         def _backward():
@@ -127,8 +127,8 @@ class Value:
 
     def relu(self):
         """
-        Applies ReLU activation function and sets up gradient computation.
-        Derivative is 1 for positive values, 0 for negative values.
+        Aplica la función de activación ReLU y configura el cómputo de gradientes.
+        La derivada es 1 para valores positivos, 0 para valores negativos.
         """
         out = Value(0 if self.data < 0 else self.data, (self,), "ReLU")
         def _backward():
@@ -138,8 +138,8 @@ class Value:
 
     def tanh(self):
         """
-        Applies tanh activation function and sets up gradient computation.
-        Derivative is 1 - tanh²(x).
+        Aplica la función de activación tanh y configura el cómputo de gradientes.
+        La derivada es 1 - tanh²(x).
         """
         x = self.data
         t = (math.exp(2*x) - 1) / (math.exp(2*x) + 1)
@@ -151,8 +151,8 @@ class Value:
 
     def backward(self):
         """
-        Performs backpropagation to compute gradients in the computational graph.
-        Uses topological sort to process nodes in correct order.
+        Realiza retropropagación para calcular gradientes en el grafo computacional.
+        Usa ordenamiento topológico para procesar nodos en orden correcto.
         """
         topo = []
         visited = set()
@@ -167,14 +167,14 @@ class Value:
         for v in reversed(topo):
             v._backward()
 
-    # Operation overloads for convenience
+    # Sobrecargas de operadores para conveniencia
     def __neg__(self): return self * -1  # -self
     def __radd__(self, other): return self + other  # other + self
     def __sub__(self, other): return self + (-other)  # self - other
     def __rsub__(self, other): return other + (-self)  # other - self
     def __rmul__(self, other): return self * other  # other * self
 
-    # Comparison and representation methods
+    # Métodos de comparación y representación
     def __repr__(self):
         return f"Value(data={self.data}, grad={self.grad})"
     def __eq__(self, other):

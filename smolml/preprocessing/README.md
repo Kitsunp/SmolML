@@ -1,151 +1,151 @@
-# SmolML - Preprocessing: Make your data meaningful
+# SmolML - Preprocesamiento: Haz que tus datos sean significativos
 
-Before we feed our precious data into many machine learning algorithms, there's often a crucial preprocessing step: **Feature Scaling**. Why? Because algorithms can be quite sensitive to the *scale* or *range* of our input features!
+Antes de alimentar nuestros preciosos datos a muchos algoritmos de machine learning, frecuentemente hay un paso crucial de preprocesamiento: **Escalado de Características**. ¿Por qué? ¡Porque los algoritmos pueden ser bastante sensibles a la *escala* o *rango* de nuestras características de entrada!
 
-## Why Bother Scaling? Let's Talk Numbers!
+## ¿Por qué Molestarse en Escalar? ¡Hablemos de Números!
 
-Imagine you have a dataset for predicting house prices with features like:
-* `size_sqft`: ranging from 500 to 5000 sq ft
-* `num_bedrooms`: ranging from 1 to 5
-* `distance_to_school_km`: ranging from 0.1 to 10 km
+Imagina que tienes un conjunto de datos para predecir precios de casas con características como:
+* `size_sqft`: rango de 500 a 5000 pies cuadrados
+* `num_bedrooms`: rango de 1 a 5
+* `distance_to_school_km`: rango de 0.1 a 10 km
 
-Now, consider algorithms that use distances (like K-Means) or rely on gradient descent (like Linear Regression or Neural Networks).
-* **Distance-Based Algorithms:** If you calculate the distance between two houses, a difference of 1000 sq ft will numerically dwarf a difference of 2 bedrooms, just because the *numbers* are bigger. The algorithm might mistakenly think `size_sqft` is vastly more important, solely due to its larger range.
-* **Gradient-Based Algorithms:** Features with vastly different scales can cause the optimization process (finding the best model weights) to be slow and unstable. Think of trying to find the bottom of a valley where one side is incredibly steep (large-range feature) and the other is very gentle (small-range feature) – it's tricky!
+Ahora, considera algoritmos que usan distancias (como K-Means) o dependen del descenso de gradiente (como Regresión Lineal o Redes Neuronales).
+* **Algoritmos Basados en Distancia:** Si calculas la distancia entre dos casas, una diferencia de 1000 pies cuadrados eclipsará numéricamente una diferencia de 2 habitaciones, solo porque los *números* son más grandes. El algoritmo podría pensar erróneamente que `size_sqft` es vastamente más importante, únicamente debido a su rango más grande.
+* **Algoritmos Basados en Gradiente:** Características con escalas vastamente diferentes pueden causar que el proceso de optimización (encontrar los mejores pesos del modelo) sea lento e inestable. Piensa en tratar de encontrar el fondo de un valle donde un lado es increíblemente empinado (característica de rango grande) y el otro es muy suave (característica de rango pequeño) – ¡es complicado!
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/2930477a-a175-41b0-a802-bdaa5ff04bbc" width="600">
 </div>
 
-**The Goal:** Feature scaling brings all features onto a similar numerical playing field. This prevents features with larger values from dominating the learning process just because of their scale, often leading to faster training convergence and sometimes even better model performance.
+**El Objetivo:** El escalado de características lleva todas las características a un campo de juego numérico similar. Esto previene que características con valores más grandes dominen el proceso de aprendizaje solo por su escala, frecuentemente llevando a convergencia de entrenamiento más rápida y a veces incluso mejor rendimiento del modelo.
 
-SmolML provides two common scalers, built using our `MLArray`.
+SmolML proporciona dos escaladores comunes, construidos usando nuestro `MLArray`.
 
-## `StandardScaler`: Zero Mean, Unit Variance
+## `StandardScaler`: Media Cero, Varianza Unitaria
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/dda0fe2b-5e9f-4fc2-a5c6-61db874e2d88" width="850">
 </div>
 
-This is one of the most popular scaling techniques, often called **Z-score normalization**.
+Esta es una de las técnicas de escalado más populares, frecuentemente llamada **normalización z-score**.
 
-**The Concept:** It transforms the data for each feature so that it has:
-* A **mean ($\mu$) of 0**.
-* A **standard deviation ($\sigma$) of 1**.
+**El Concepto:** Transforma los datos para cada característica de modo que tenga:
+* Una **media ($\mu$) de 0**.
+* Una **desviación estándar ($\sigma$) de 1**.
 
-**How it Works:** For each value $x$ in a feature, it applies the formula:
+**Cómo Funciona:** Para cada valor $x$ en una característica, aplica la fórmula:
 $$ z = \frac{x - \mu}{\sigma} $$
-* **Subtracting the mean ($\mu$)**: This centers the data for that feature around zero.
-* **Dividing by the standard deviation ($\sigma$)**: This scales the data so that it has a standard deviation of 1, meaning the "spread" of the data becomes consistent across features.
+* **Restar la media ($\mu$)**: Esto centra los datos para esa característica alrededor de cero.
+* **Dividir por la desviación estándar ($\sigma$)**: Esto escala los datos de modo que tenga una desviación estándar de 1, significando que la "dispersión" de los datos se vuelve consistente a través de las características.
 
-**Implementation (`StandardScaler` class in `scalers.py`):**
+**Implementación (clase `StandardScaler` en `scalers.py`):**
 
-It's a two-step process:
+Es un proceso de dos pasos:
 
-1.  **`fit(self, X)`:** This method learns the necessary parameters *from your training data*.
-    * It calculates the mean (`self.mean`) and standard deviation (`self.std`) for *each feature column* (using `X.mean(axis=0)` and `X.std(axis=0)` from our `MLArray`).
-    * It stores these calculated `mean` and `std` values within the scaler object.
-    * *Heads up:* It also includes logic to handle cases where a feature has zero standard deviation (i.e., all values are the same). In this case, it sets the standard deviation to 1 to avoid division by zero during the transform step.
+1.  **`fit(self, X)`:** Este método aprende los parámetros necesarios *de tus datos de entrenamiento*.
+    * Calcula la media (`self.mean`) y desviación estándar (`self.std`) para *cada columna de característica* (usando `X.mean(axis=0)` y `X.std(axis=0)` de nuestro `MLArray`).
+    * Almacena estos valores calculados de `mean` y `std` dentro del objeto escalador.
+    * *Atención:* También incluye lógica para manejar casos donde una característica tiene desviación estándar cero (es decir, todos los valores son iguales). En este caso, establece la desviación estándar a 1 para evitar división por cero durante el paso de transformación.
 
-2.  **`transform(self, X)`:** This method applies the scaling using the *previously learned* parameters.
-    * It takes any dataset `X` (could be your training data again, or new test/prediction data) and applies the Z-score formula: `(X - self.mean) / self.std`.
-    * The result is your scaled data, ready for your model!
+2.  **`transform(self, X)`:** Este método aplica el escalado usando los parámetros *previamente aprendidos*.
+    * Toma cualquier conjunto de datos `X` (podría ser tus datos de entrenamiento otra vez, o nuevos datos de prueba/predicción) y aplica la fórmula z-score: `(X - self.mean) / self.std`.
+    * El resultado son tus datos escalados, ¡listos para tu modelo!
 
-## `MinMaxScaler`: Squeezing into [0, 1]
+## `MinMaxScaler`: Comprimiendo en [0, 1]
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/f2153e47-bf00-482e-9784-567a462b96e1" width="850">
 </div>
 
-Another common technique, especially useful when you want features bounded within a specific range.
+Otra técnica común, especialmente útil cuando quieres características limitadas dentro de un rango específico.
 
-**The Concept:** It transforms the data for each feature so that all values fall neatly within the range **[0, 1]**.
+**El Concepto:** Transforma los datos para cada característica de modo que todos los valores caigan ordenadamente dentro del rango **[0, 1]**.
 
-**How it Works:** For each value $x$ in a feature, it applies the formula:
-$$ x_{scaled} = \frac{x - x_{min}}{x_{max} - x_{min}} $$
-* **Subtracting the minimum ($x_{min}$)**: This shifts the data so the minimum value becomes 0.
-* **Dividing by the range ($x_{max} - x_{min}$)**: This scales the data proportionally so that the maximum value becomes 1. All other values fall somewhere in between.
+**Cómo Funciona:** Para cada valor $x$ en una característica, aplica la fórmula:
+$$ x_{escalado} = \frac{x - x_{min}}{x_{max} - x_{min}} $$
+* **Restar el mínimo ($x_{min}$)**: Esto desplaza los datos de modo que el valor mínimo se convierte en 0.
+* **Dividir por el rango ($x_{max} - x_{min}$)**: Esto escala los datos proporcionalmente de modo que el valor máximo se convierte en 1. Todos los otros valores caen en algún lugar intermedio.
 
-**Implementation (`MinMaxScaler` class in `scalers.py`):**
+**Implementación (clase `MinMaxScaler` en `scalers.py`):**
 
-Similar two-step process:
+Proceso similar de dos pasos:
 
-1.  **`fit(self, X)`:** Learns the parameters from the training data.
-    * It finds the minimum (`self.min`) and maximum (`self.max`) value for *each feature column* (using `X.min(axis=0)` and `X.max(axis=0)` from `MLArray`).
-    * It stores these `min` and `max` values.
+1.  **`fit(self, X)`:** Aprende los parámetros de los datos de entrenamiento.
+    * Encuentra el valor mínimo (`self.min`) y máximo (`self.max`) para *cada columna de característica* (usando `X.min(axis=0)` y `X.max(axis=0)` de `MLArray`).
+    * Almacena estos valores `min` y `max`.
 
-2.  **`transform(self, X)`:** Applies the scaling using the learned parameters.
-    * It takes any dataset `X` and applies the Min-Max formula: `(X - self.min) / (self.max - self.min)`.
-    * Voila! Your data is now scaled between 0 and 1.
+2.  **`transform(self, X)`:** Aplica el escalado usando los parámetros aprendidos.
+    * Toma cualquier conjunto de datos `X` y aplica la fórmula Min-Max: `(X - self.min) / (self.max - self.min)`.
+    * ¡Voilà! Tus datos ahora están escalados entre 0 y 1.
 
-## The Golden Rule: Fit on Train, Transform Train & Test!
+## La Regla de Oro: ¡Ajustar en Entrenamiento, Transformar Entrenamiento y Prueba!
 
-This is super important!
+¡Esto es súper importante!
 
-* You should **only** call the `fit()` or `fit_transform()` method on your **training data**. The scaler needs to learn the mean/std or min/max *only* from the data your model will train on.
-* You then use the *same fitted scaler* (with the learned parameters) to call `transform()` on your **training data** AND your **test/validation/new prediction data**.
+* Deberías **únicamente** llamar al método `fit()` o `fit_transform()` en tus **datos de entrenamiento**. El escalador necesita aprender la media/std o min/max *únicamente* de los datos en los que tu modelo entrenará.
+* Luego usas el *mismo escalador ajustado* (con los parámetros aprendidos) para llamar `transform()` en tus **datos de entrenamiento** Y tus **datos de prueba/validación/predicción nueva**.
 
-Why? You want to apply the *exact same transformation* to all your data, based only on what the model learned during training. Fitting the scaler on the test data would be a form of "data leakage" – letting your preprocessing step peek at data it shouldn't see yet!
+¿Por qué? Quieres aplicar la *misma transformación exacta* a todos tus datos, basándose únicamente en lo que el modelo aprendió durante el entrenamiento. Ajustar el escalador en los datos de prueba sería una forma de "fuga de datos" – permitir que tu paso de preprocesamiento vea datos que no debería ver aún.
 
-**Convenience:** Both scalers have a `fit_transform(self, X)` method that simply calls `fit(X)` followed by `transform(X)` on the same data – perfect for applying scaling to your training set in one go.
+**Conveniencia:** Ambos escaladores tienen un método `fit_transform(self, X)` que simplemente llama `fit(X)` seguido de `transform(X)` en los mismos datos – perfecto para aplicar escalado a tu conjunto de entrenamiento de una vez.
 
-## Example Usage
+## Ejemplo de Uso
 
-Let's scale some simple data using `StandardScaler`:
+Escalemos algunos datos simples usando `StandardScaler`:
 
 ```python
 from smolml.preprocessing import StandardScaler, MinMaxScaler
 from smolml.core.ml_array import MLArray
 
-# Sample data (e.g., 3 samples, 2 features with different scales)
+# Datos de muestra (ej., 3 muestras, 2 características con diferentes escalas)
 X_train_data = [[10, 100],
                 [20, 150],
                 [30, 120]]
 
-# New data to predict on later (must be scaled the same way!)
+# Nuevos datos para predecir más tarde (¡deben escalarse de la misma manera!)
 X_new_data = [[15, 110],
               [25, 160]]
 
-# Convert to MLArray
+# Convertir a MLArray
 X_train = MLArray(X_train_data)
 X_new = MLArray(X_new_data)
 
-# --- Using StandardScaler ---
-print("--- Using StandardScaler ---")
+# --- Usando StandardScaler ---
+print("--- Usando StandardScaler ---")
 scaler_std = StandardScaler()
 
-# Fit ONCE on training data, then transform it
+# Ajustar UNA VEZ en datos de entrenamiento, luego transformarlos
 X_train_scaled_std = scaler_std.fit_transform(X_train)
 
-# Transform the NEW data using the SAME scaler (already fitted)
+# Transformar los datos NUEVOS usando el MISMO escalador (ya ajustado)
 X_new_scaled_std = scaler_std.transform(X_new)
 
-print("Original Training Data:\n", X_train)
-print("Scaled Training Data (StandardScaler):\n", X_train_scaled_std)
-print("\nOriginal New Data:\n", X_new)
-print("Scaled New Data (StandardScaler):\n", X_new_scaled_std)
-print(f"Learned Mean: {scaler_std.mean}")
-print(f"Learned Std Dev: {scaler_std.std}")
+print("Datos de Entrenamiento Originales:\n", X_train)
+print("Datos de Entrenamiento Escalados (StandardScaler):\n", X_train_scaled_std)
+print("\nDatos Nuevos Originales:\n", X_new)
+print("Datos Nuevos Escalados (StandardScaler):\n", X_new_scaled_std)
+print(f"Media Aprendida: {scaler_std.mean}")
+print(f"Desviación Estándar Aprendida: {scaler_std.std}")
 
 
-# --- Using MinMaxScaler ---
-print("\n--- Using MinMaxScaler ---")
+# --- Usando MinMaxScaler ---
+print("\n--- Usando MinMaxScaler ---")
 scaler_minmax = MinMaxScaler()
 
-# Fit ONCE on training data, then transform it
+# Ajustar UNA VEZ en datos de entrenamiento, luego transformarlos
 X_train_scaled_mm = scaler_minmax.fit_transform(X_train)
 
-# Transform the NEW data using the SAME scaler (already fitted)
+# Transformar los datos NUEVOS usando el MISMO escalador (ya ajustado)
 X_new_scaled_mm = scaler_minmax.transform(X_new)
 
-print("Original Training Data:\n", X_train)
-print("Scaled Training Data (MinMaxScaler):\n", X_train_scaled_mm)
-print("\nOriginal New Data:\n", X_new)
-print("Scaled New Data (MinMaxScaler):\n", X_new_scaled_mm)
-print(f"Learned Min: {scaler_minmax.min}")
-print(f"Learned Max: {scaler_minmax.max}")
+print("Datos de Entrenamiento Originales:\n", X_train)
+print("Datos de Entrenamiento Escalados (MinMaxScaler):\n", X_train_scaled_mm)
+print("\nDatos Nuevos Originales:\n", X_new)
+print("Datos Nuevos Escalados (MinMaxScaler):\n", X_new_scaled_mm)
+print(f"Mínimo Aprendido: {scaler_minmax.min}")
+print(f"Máximo Aprendido: {scaler_minmax.max}")
 ```
 
-## Scaling Up!
+## ¡Escalando!
 
-Feature scaling is a fundamental step in the machine learning pipeline for many algorithms. By bringing features onto a common scale using techniques like standardization (``StandardScaler``) or normalization (``MinMaxScaler``), you can often improve your model's convergence speed and performance. SmolML provides these essential tools, leveraging the computational power of MLArray to make preprocessing straightforward! Don't forget the golden rule: fit only on train, transform everything!
+El escalado de características es un paso fundamental en el pipeline de machine learning para muchos algoritmos. Al llevar características a una escala común usando técnicas como estandarización (`StandardScaler`) o normalización (`MinMaxScaler`), frecuentemente puedes mejorar la velocidad de convergencia y rendimiento de tu modelo. ¡SmolML proporciona estas herramientas esenciales, aprovechando el poder computacional de MLArray para hacer el preprocesamiento directo! No olvides la regla de oro: ¡ajustar solo en entrenamiento, transformar todo!

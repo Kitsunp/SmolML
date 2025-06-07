@@ -35,7 +35,7 @@ from .optimizers import (
 from .memory import (format_size, calculate_value_size, calculate_mlarray_size, calculate_neural_network_size)
 
 __all__ = [
-    # Activation functions
+    # Funciones de activación
     'relu',
     'leaky_relu',
     'elu',
@@ -44,13 +44,13 @@ __all__ = [
     'tanh',
     'linear',
     
-    # Initializers
+    # Inicializadores
     'WeightInitializer',
     'XavierUniform',
     'XavierNormal',
     'HeInitialization',
     
-    # Loss functions
+    # Funciones de pérdida
     'mse_loss',
     'mae_loss',
     'binary_cross_entropy',
@@ -58,14 +58,14 @@ __all__ = [
     'huber_loss',
     'log_cosh_loss',
     
-    # Optimizers
+    # Optimizadores
     'Optimizer',
     'SGD',
     'SGDMomentum',
     'AdaGrad',
     'Adam',
 
-    # Memory
+    # Memoria
     'format_size',
     'calculate_value_size',
     'calculate_mlarray_size',

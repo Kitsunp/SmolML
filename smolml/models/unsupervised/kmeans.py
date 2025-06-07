@@ -7,22 +7,22 @@ import random
 /// KMEANS ///
 ///////////////
 
-Unsupervised clustering algorithm that partitions n samples into k clusters.
-Each cluster is represented by the mean of its points (centroid).
-Implementation focuses on using MLArray for computations and handling.
+Algoritmo de clustering no supervisado que particiona n muestras en k clusters.
+Cada cluster está representado por la media de sus puntos (centroide).
+La implementación se enfoca en usar MLArray para cálculos y manejo.
 """
 class KMeans:
     """
-    Implementation of the K-means clustering algorithm using MLArray.
-    Partitions data into k clusters by iteratively updating cluster centers
-    and reassigning points to the nearest center. Uses Euclidean distance
-    for similarity measurement and means for centroid updates.
+    Implementación del algoritmo de clustering K-means usando MLArray.
+    Particiona datos en k clusters actualizando iterativamente centros de cluster
+    y reasignando puntos al centro más cercano. Usa distancia Euclidiana
+    para medición de similitud y medias para actualizaciones de centroides.
     """
     def __init__(self, n_clusters, max_iters, tol) -> None:
         """
-        Initializes KMeans with the number of clusters, maximum iterations,
-        and convergence tolerance. Sets up empty placeholders for centroids
-        and cluster assignments.
+        Inicializa KMeans con el número de clusters, iteraciones máximas,
+        y tolerancia de convergencia. Configura marcadores de posición vacíos para centroides
+        y asignaciones de clusters.
         """
         self.n_clusters = n_clusters
         self.max_iters = max_iters
@@ -33,9 +33,9 @@ class KMeans:
 
     def _initialize_centroids(self, X_train):
         """
-        Randomly selects k points from the input data to serve as initial
-        centroids. Uses random sampling without replacement to ensure
-        distinct initial positions.
+        Selecciona aleatoriamente k puntos de los datos de entrada para servir como
+        centroides iniciales. Usa muestreo aleatorio sin reemplazo para asegurar
+        posiciones iniciales distintas.
         """
         centroids = random.sample(X_train.to_list(), self.n_clusters)
         self.centroids = MLArray(centroids)
@@ -44,9 +44,9 @@ class KMeans:
     
     def _compute_distances(self, X_train):
         """
-        Computes the Euclidean distances between all data points and all
-        centroids. Uses MLArray broadcasting for efficient computation
-        and avoids explicit loops where possible.
+        Calcula las distancias Euclidianas entre todos los puntos de datos y todos
+        los centroides. Usa broadcasting de MLArray para cálculo eficiente
+        y evita bucles explícitos donde sea posible.
         """
         diff = X_train.reshape(-1, 1, X_train.shape[1]) - self.centroids
         squared_diff = diff * diff
@@ -56,9 +56,9 @@ class KMeans:
     
     def _assign_clusters(self, distance_matrix):
         """
-        Assigns each data point to its nearest centroid based on the
-        computed distance matrix. Converts arrays to lists for efficient
-        minimum finding and handles the conversion back to MLArray format.
+        Asigna cada punto de datos a su centroide más cercano basándose en la
+        matriz de distancias calculada. Convierte arrays a listas para encontrar
+        mínimos eficientemente y maneja la conversión de vuelta a formato MLArray.
         """
         distances = distance_matrix.to_list()
         labels = []
@@ -79,10 +79,10 @@ class KMeans:
     
     def _update_centroids(self, X_train):
         """
-        Updates centroid positions by computing the mean of all points
-        assigned to each cluster. Handles empty clusters by maintaining
-        their previous positions. Checks convergence by measuring the
-        total movement of all centroids.
+        Actualiza posiciones de centroides calculando la media de todos los puntos
+        asignados a cada cluster. Maneja clusters vacíos manteniendo
+        sus posiciones previas. Verifica convergencia midiendo el
+        movimiento total de todos los centroides.
         """
         X_data = X_train.to_list()
         labels = self.labels_.to_list()
@@ -107,7 +107,7 @@ class KMeans:
         
         old_centroids = self.centroids
         self.centroids = MLArray(new_centroids)
-        self.centroid_history.append(new_centroids)  # Record new centroids
+        self.centroid_history.append(new_centroids)  # Registrar nuevos centroides
         
         if old_centroids is not None:
             diff = self.centroids - old_centroids
@@ -118,9 +118,9 @@ class KMeans:
 
     def fit(self, X_train):
         """
-        Main training loop of the KMeans algorithm. Initializes centroids
-        and iteratively refines them until convergence or maximum iterations
-        are reached. Returns self for method chaining.
+        Loop de entrenamiento principal del algoritmo KMeans. Inicializa centroides
+        y los refina iterativamente hasta convergencia o hasta que se alcancen las iteraciones máximas.
+        Retorna self para encadenamiento de métodos.
         """
         self.centroids = self._initialize_centroids(X_train)
         
@@ -136,18 +136,18 @@ class KMeans:
     
     def predict(self, X):
         """
-        Predicts cluster assignments for new data points using the trained
-        centroids. Raises an error if called before fitting the model.
+        Predice asignaciones de clusters para nuevos puntos de datos usando los
+        centroides entrenados. Lanza error si se llama antes de ajustar el modelo.
         """
         if self.centroids is None:
-            raise ValueError("Model has not been fitted yet.")
+            raise ValueError("El modelo aún no ha sido ajustado.")
         
         distances = self._compute_distances(X)
         return self._assign_clusters(distances)
     
     def fit_predict(self, X_train):
         """
-        Convenience method that performs fitting and prediction in one step.
-        Equivalent to calling fit() followed by predict() on the same data.
+        Método de conveniencia que realiza ajuste y predicción en un paso.
+        Equivalente a llamar fit() seguido de predict() en los mismos datos.
         """
         return self.fit(X_train).predict(X_train)

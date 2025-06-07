@@ -3,18 +3,18 @@ import math
 
 """
 ////////////////////////////
-/// ACTIVATION FUNCTIONS ///
+/// FUNCIONES DE ACTIVACIÓN ///
 ////////////////////////////
 
-Activation functions for neural network layers.
-Each function applies non-linear transformations element-wise.
+Funciones de activación para capas de redes neuronales.
+Cada función aplica transformaciones no lineales elemento por elemento.
 """
 
 def _element_wise_activation(x, activation_fn):
     """
-    Helper function to apply activation function element-wise to n-dimensional MLArray
+    Función auxiliar para aplicar función de activación elemento por elemento a MLArray n-dimensional
     """
-    if len(x.shape) == 0:  # scalar
+    if len(x.shape) == 0:  # escalar
         return MLArray(activation_fn(x.data))
     
     def apply_recursive(data):
@@ -26,17 +26,17 @@ def _element_wise_activation(x, activation_fn):
 
 def relu(x):
     """
-    Rectified Linear Unit (ReLU) activation.
-    Computes max(0,x) for each element.
-    Standard choice for deep networks.
+    Activación Unidad Lineal Rectificada (ReLU).
+    Calcula max(0,x) para cada elemento.
+    Elección estándar para redes profundas.
     """
     return _element_wise_activation(x, lambda val: val.relu())
 
 def leaky_relu(x, alpha=0.01):
     """
-    Leaky ReLU activation.
-    Returns x if x > 0, else alpha * x.
-    Prevents dying ReLU problem with small negative slope.
+    Activación ReLU con fuga.
+    Retorna x si x > 0, sino alpha * x.
+    Previene el problema de ReLU moribundo con pendiente negativa pequeña.
     """
     def leaky_relu_single(val):
         if val > 0:
@@ -47,9 +47,9 @@ def leaky_relu(x, alpha=0.01):
 
 def elu(x, alpha=1.0):
     """
-    Exponential Linear Unit.
-    Returns x if x > 0, else alpha * (e^x - 1).
-    Smoother alternative to ReLU with negative values.
+    Unidad Lineal Exponencial.
+    Retorna x si x > 0, sino alpha * (e^x - 1).
+    Alternativa más suave a ReLU con valores negativos.
     """
     def elu_single(val):
         if val > 0:
@@ -60,9 +60,9 @@ def elu(x, alpha=1.0):
 
 def sigmoid(x):
     """
-    Sigmoid activation.
-    Maps inputs to (0,1) range using 1/(1 + e^-x).
-    Used for binary classification output.
+    Activación sigmoide.
+    Mapea entradas al rango (0,1) usando 1/(1 + e^-x).
+    Usada para salida de clasificación binaria.
     """
     def sigmoid_single(val):
         return 1 / (1 + (-val).exp())
@@ -71,60 +71,60 @@ def sigmoid(x):
 
 def softmax(x, axis=-1):
     """
-    Softmax activation.
-    Normalizes inputs into probability distribution.
-    Used for multi-class classification output.
+    Activación softmax.
+    Normaliza entradas en distribución de probabilidad.
+    Usada para salida de clasificación multi-clase.
     """
-    # Handle scalar case
+    # Manejar caso escalar
     if len(x.shape) == 0:
-        return MLArray(1.0)  # Softmax of a scalar is always 1
+        return MLArray(1.0)  # Softmax de un escalar siempre es 1
         
-    # Handle negative axis
+    # Manejar eje negativo
     if axis < 0:
         axis += len(x.shape)
         
-    # Handle 1D case
+    # Manejar caso 1D
     if len(x.shape) == 1:
         max_val = x.max()
         exp_x = (x - max_val).exp()
         sum_exp = exp_x.sum()
         return exp_x / sum_exp
     
-    # Handle multi-dimensional case
+    # Manejar caso multi-dimensional
     def apply_softmax_along_axis(data, curr_depth=0):
         """
-        Recursively applies softmax along specified axis
+        Aplica recursivamente softmax a lo largo del eje especificado
         """
         if curr_depth == axis:
             if isinstance(data[0], list):
-                # Convert to transpose without using zip
+                # Convertir a transpuesta sin usar zip
                 transposed = []
                 for i in range(len(data[0])):
                     slice_data = [row[i] for row in data]
-                    # Find max for numerical stability
+                    # Encontrar max para estabilidad numérica
                     max_val = max(slice_data)
-                    # Compute exp(x - max)
+                    # Calcular exp(x - max)
                     exp_vals = [(val - max_val).exp() for val in slice_data]
-                    # Compute sum
+                    # Calcular suma
                     sum_exp = sum(exp_vals)
-                    # Compute softmax
+                    # Calcular softmax
                     softmax_vals = [exp_val / sum_exp for exp_val in exp_vals]
                     transposed.append(softmax_vals)
                     
-                # Convert back from transpose without using zip
+                # Convertir de vuelta desde transpuesta sin usar zip
                 result = []
                 for i in range(len(data)):
                     row = [transposed[j][i] for j in range(len(transposed))]
                     result.append(row)
                 return result
             else:
-                # Direct computation for 1D slice
+                # Cálculo directo para segmento 1D
                 max_val = max(data)
                 exp_vals = [(val - max_val).exp() for val in data]
                 sum_exp = sum(exp_vals)
                 return [exp_val / sum_exp for exp_val in exp_vals]
         
-        # Recursive case: not at target axis yet
+        # Caso recursivo: aún no en eje objetivo
         return [apply_softmax_along_axis(subarray, curr_depth + 1) 
                 for subarray in data]
     
@@ -133,14 +133,14 @@ def softmax(x, axis=-1):
 
 def tanh(x):
     """
-    Hyperbolic tangent activation.
-    Maps inputs to [-1,1] range.
+    Activación tangente hiperbólica.
+    Mapea entradas al rango [-1,1].
     """
     return _element_wise_activation(x, lambda val: val.tanh())
 
 def linear(x):
     """
-    Linear/Identity activation.
-    Passes input through unchanged.
+    Activación lineal/identidad.
+    Pasa la entrada sin cambios.
     """
     return x

@@ -14,14 +14,14 @@ from smolml.preprocessing.scalers import StandardScaler, MinMaxScaler
 
 class TestScalers(unittest.TestCase):
     """
-    Test custom scaler implementations against scikit-learn's
+    Probar implementaciones de escaladores personalizados contra scikit-learn
     """
     
     def setUp(self):
         """
-        Set up test data and initialize scalers
+        Configurar datos de prueba e inicializar escaladores
         """
-        # Simple test data
+        # Datos de prueba simples
         self.simple_data = [
             [1, 4], 
             [100, 2], 
@@ -30,22 +30,22 @@ class TestScalers(unittest.TestCase):
             [50, -4]
         ]
         
-        # Edge case data
+        # Datos de casos extremos
         self.edge_data = [
-            [0, 0],  # zeros
-            [1e6, 1e-6],  # very large/small values
-            [-1e6, -1e-6],  # negative large/small values
-            [1, 1],  # same values
-            [-1, -1]  # same negative values
+            [0, 0],  # ceros
+            [1e6, 1e-6],  # valores muy grandes/pequeños
+            [-1e6, -1e-6],  # valores grandes/pequeños negativos
+            [1, 1],  # mismos valores
+            [-1, -1]  # mismos valores negativos
         ]
         
-        # Convert to proper formats
+        # Convertir a formatos apropiados
         self.simple_ml = MLArray(self.simple_data)
         self.simple_np = np.array(self.simple_data)
         self.edge_ml = MLArray(self.edge_data)
         self.edge_np = np.array(self.edge_data)
         
-        # Initialize all scalers
+        # Inicializar todos los escaladores
         self.standard_ml = StandardScaler()
         self.standard_sk = SKStandardScaler()
         self.minmax_ml = MinMaxScaler()
@@ -53,23 +53,23 @@ class TestScalers(unittest.TestCase):
 
     def plot_comparison(self, original_data, ml_scaled, sk_scaled, title, filename):
         """
-        Create visualization comparing original and scaled data
+        Crear visualización comparando datos originales y escalados
         """
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
         
-        # Original data
+        # Datos originales
         ax1.scatter(original_data[:, 0], original_data[:, 1], c='blue', alpha=0.6)
-        ax1.set_title('Original Data')
+        ax1.set_title('Datos Originales')
         ax1.grid(True)
         
-        # Custom implementation
+        # Implementación personalizada
         ax2.scatter(ml_scaled[:, 0], ml_scaled[:, 1], c='red', alpha=0.6)
-        ax2.set_title('Custom Scaler')
+        ax2.set_title('Escalador Personalizado')
         ax2.grid(True)
         
-        # Scikit-learn implementation
+        # Implementación scikit-learn
         ax3.scatter(sk_scaled[:, 0], sk_scaled[:, 1], c='green', alpha=0.6)
-        ax3.set_title('Scikit-learn Scaler')
+        ax3.set_title('Escalador Scikit-learn')
         ax3.grid(True)
         
         plt.suptitle(title)
@@ -78,35 +78,35 @@ class TestScalers(unittest.TestCase):
         plt.close()
 
     def test_standard_scaler_simple(self):
-        """Test StandardScaler with simple data"""
-        print("\nTesting StandardScaler with simple data...")
+        """Probar StandardScaler con datos simples"""
+        print("\nProbando StandardScaler con datos simples...")
         
-        # Fit and transform using both implementations
+        # Ajustar y transformar usando ambas implementaciones
         ml_scaled = self.standard_ml.fit_transform(self.simple_ml)
         sk_scaled = self.standard_sk.fit_transform(self.simple_np)
         
-        # Convert MLArray to numpy for comparison
+        # Convertir MLArray a numpy para comparación
         ml_scaled_np = np.array(ml_scaled.to_list())
         
-        # Plot comparison
+        # Graficar comparación
         self.plot_comparison(
             self.simple_np, 
             ml_scaled_np, 
             sk_scaled,
-            'StandardScaler Comparison - Simple Data',
+            'Comparación StandardScaler - Datos Simples',
             'standard_scaler_simple.png'
         )
         
-        # Basic statistical tests
-        print("\nStandard Scaler Statistics (Simple Data):")
-        print("Custom Implementation:")
-        print(f"Mean: {ml_scaled_np.mean(axis=0)}")
+        # Pruebas estadísticas básicas
+        print("\nEstadísticas del Escalador Estándar (Datos Simples):")
+        print("Implementación Personalizada:")
+        print(f"Media: {ml_scaled_np.mean(axis=0)}")
         print(f"Std: {ml_scaled_np.std(axis=0)}")
-        print("\nScikit-learn Implementation:")
-        print(f"Mean: {sk_scaled.mean(axis=0)}")
+        print("\nImplementación Scikit-learn:")
+        print(f"Media: {sk_scaled.mean(axis=0)}")
         print(f"Std: {sk_scaled.std(axis=0)}")
         
-        # Assertions
+        # Aserciones
         np.testing.assert_array_almost_equal(
             ml_scaled_np.mean(axis=0), 
             np.zeros_like(ml_scaled_np.mean(axis=0)), 
@@ -120,58 +120,58 @@ class TestScalers(unittest.TestCase):
         np.testing.assert_array_almost_equal(ml_scaled_np, sk_scaled, decimal=10)
 
     def test_standard_scaler_edge(self):
-        """Test StandardScaler with edge cases"""
-        print("\nTesting StandardScaler with edge cases...")
+        """Probar StandardScaler con casos extremos"""
+        print("\nProbando StandardScaler con casos extremos...")
         
-        # Fit and transform using both implementations
+        # Ajustar y transformar usando ambas implementaciones
         ml_scaled = self.standard_ml.fit_transform(self.edge_ml)
         sk_scaled = self.standard_sk.fit_transform(self.edge_np)
         
-        # Convert MLArray to numpy for comparison
+        # Convertir MLArray a numpy para comparación
         ml_scaled_np = np.array(ml_scaled.to_list())
         
-        # Plot comparison
+        # Graficar comparación
         self.plot_comparison(
             self.edge_np, 
             ml_scaled_np, 
             sk_scaled,
-            'StandardScaler Comparison - Edge Cases',
+            'Comparación StandardScaler - Casos Extremos',
             'standard_scaler_edge.png'
         )
         
-        # Assertions for edge cases
+        # Aserciones para casos extremos
         np.testing.assert_array_almost_equal(ml_scaled_np, sk_scaled, decimal=10)
 
     def test_minmax_scaler_simple(self):
-        """Test MinMaxScaler with simple data"""
-        print("\nTesting MinMaxScaler with simple data...")
+        """Probar MinMaxScaler con datos simples"""
+        print("\nProbando MinMaxScaler con datos simples...")
         
-        # Fit and transform using both implementations
+        # Ajustar y transformar usando ambas implementaciones
         ml_scaled = self.minmax_ml.fit_transform(self.simple_ml)
         sk_scaled = self.minmax_sk.fit_transform(self.simple_np)
         
-        # Convert MLArray to numpy for comparison
+        # Convertir MLArray a numpy para comparación
         ml_scaled_np = np.array(ml_scaled.to_list())
         
-        # Plot comparison
+        # Graficar comparación
         self.plot_comparison(
             self.simple_np, 
             ml_scaled_np, 
             sk_scaled,
-            'MinMaxScaler Comparison - Simple Data',
+            'Comparación MinMaxScaler - Datos Simples',
             'minmax_scaler_simple.png'
         )
         
-        # Basic range tests
-        print("\nMinMax Scaler Statistics (Simple Data):")
-        print("Custom Implementation:")
+        # Pruebas de rango básicas
+        print("\nEstadísticas del Escalador MinMax (Datos Simples):")
+        print("Implementación Personalizada:")
         print(f"Min: {ml_scaled_np.min(axis=0)}")
         print(f"Max: {ml_scaled_np.max(axis=0)}")
-        print("\nScikit-learn Implementation:")
+        print("\nImplementación Scikit-learn:")
         print(f"Min: {sk_scaled.min(axis=0)}")
         print(f"Max: {sk_scaled.max(axis=0)}")
         
-        # Assertions
+        # Aserciones
         np.testing.assert_array_almost_equal(
             ml_scaled_np.min(axis=0), 
             np.zeros_like(ml_scaled_np.min(axis=0)), 
@@ -185,46 +185,46 @@ class TestScalers(unittest.TestCase):
         np.testing.assert_array_almost_equal(ml_scaled_np, sk_scaled, decimal=10)
 
     def test_minmax_scaler_edge(self):
-        """Test MinMaxScaler with edge cases"""
-        print("\nTesting MinMaxScaler with edge cases...")
+        """Probar MinMaxScaler con casos extremos"""
+        print("\nProbando MinMaxScaler con casos extremos...")
         
-        # Fit and transform using both implementations
+        # Ajustar y transformar usando ambas implementaciones
         ml_scaled = self.minmax_ml.fit_transform(self.edge_ml)
         sk_scaled = self.minmax_sk.fit_transform(self.edge_np)
         
-        # Convert MLArray to numpy for comparison
+        # Convertir MLArray a numpy para comparación
         ml_scaled_np = np.array(ml_scaled.to_list())
         
-        # Plot comparison
+        # Graficar comparación
         self.plot_comparison(
             self.edge_np, 
             ml_scaled_np, 
             sk_scaled,
-            'MinMaxScaler Comparison - Edge Cases',
+            'Comparación MinMaxScaler - Casos Extremos',
             'minmax_scaler_edge.png'
         )
         
-        # Assertions for edge cases
+        # Aserciones para casos extremos
         np.testing.assert_array_almost_equal(ml_scaled_np, sk_scaled, decimal=10)
 
     def test_single_value(self):
-        """Test scalers with single value"""
+        """Probar escaladores con valor único"""
         single_data_ml = MLArray([[1.0, 2.0]])
         single_data_np = np.array([[1.0, 2.0]])
         
-        # Test StandardScaler
+        # Probar StandardScaler
         std_ml = self.standard_ml.fit_transform(single_data_ml)
         std_sk = self.standard_sk.fit_transform(single_data_np)
         
-        # Test MinMaxScaler
+        # Probar MinMaxScaler
         minmax_ml = self.minmax_ml.fit_transform(single_data_ml)
         minmax_sk = self.minmax_sk.fit_transform(single_data_np)
         
-        # Convert to numpy for comparison
+        # Convertir a numpy para comparación
         std_ml_np = np.array(std_ml.to_list())
         minmax_ml_np = np.array(minmax_ml.to_list())
         
-        # These should be either 0 or NaN for both implementations
+        # Estos deberían ser 0 o NaN para ambas implementaciones
         np.testing.assert_array_almost_equal(std_ml_np, std_sk, decimal=10)
         np.testing.assert_array_almost_equal(minmax_ml_np, minmax_sk, decimal=10)
 

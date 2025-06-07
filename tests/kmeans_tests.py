@@ -13,18 +13,18 @@ from smolml.models.unsupervised.kmeans import KMeans
 
 class TestKMeansVsSklearn(unittest.TestCase):
     """
-    Compare custom KMeans implementation against scikit-learn
-    using synthetic clustered data
+    Comparar implementación K-Means personalizada contra scikit-learn
+    usando datos sintéticos agrupados
     """
     
     def setUp(self):
         """
-        Set up dataset and models
+        Configurar conjunto de datos y modelos
         """
-        # Set random seed for reproducibility
+        # Establecer semilla aleatoria para reproducibilidad
         np.random.seed(42)
         
-        # Generate synthetic clustered data
+        # Generar datos agrupados sintéticos
         n_samples = 300
         self.n_clusters = 3
         X, y = make_blobs(n_samples=n_samples, 
@@ -32,18 +32,18 @@ class TestKMeansVsSklearn(unittest.TestCase):
                          cluster_std=1.0,
                          random_state=42)
         
-        # Scale the data
+        # Escalar los datos
         self.scaler = StandardScaler()
         X = self.scaler.fit_transform(X)
         
-        # Store the data
+        # Almacenar los datos
         self.X = X
         self.y = y
         
-        # Convert data for custom implementation
+        # Convertir datos para implementación personalizada
         self.X_ml = MLArray([[float(x) for x in row] for row in self.X])
         
-        # Initialize models
+        # Inicializar modelos
         self.custom_kmeans = KMeans(n_clusters=self.n_clusters, 
                                   max_iters=100, 
                                   tol=1e-4)
@@ -54,11 +54,11 @@ class TestKMeansVsSklearn(unittest.TestCase):
 
     def _plot_clusters(self, custom_labels, sklearn_labels):
         """
-        Plot clustering results from both implementations
+        Graficar resultados de clustering de ambas implementaciones
         """
         plt.figure(figsize=(12, 5))
         
-        # Plot custom implementation results
+        # Graficar resultados de implementación personalizada
         plt.subplot(1, 2, 1)
         plt.scatter(self.X[:, 0], self.X[:, 1], c=custom_labels.to_list(), 
                    cmap='viridis', alpha=0.6)
@@ -66,28 +66,28 @@ class TestKMeansVsSklearn(unittest.TestCase):
         plt.scatter(np.array(custom_centroids)[:, 0], 
                    np.array(custom_centroids)[:, 1], 
                    c='red', marker='x', s=200, linewidth=3, 
-                   label='Centroids')
-        plt.title('Custom KMeans Clustering')
+                   label='Centroides')
+        plt.title('Clustering K-Means Personalizado')
         plt.legend()
         
-        # Plot scikit-learn results
+        # Graficar resultados scikit-learn
         plt.subplot(1, 2, 2)
         plt.scatter(self.X[:, 0], self.X[:, 1], c=sklearn_labels, 
                    cmap='viridis', alpha=0.6)
         plt.scatter(self.sklearn_kmeans.cluster_centers_[:, 0],
                    self.sklearn_kmeans.cluster_centers_[:, 1],
                    c='red', marker='x', s=200, linewidth=3,
-                   label='Centroids')
-        plt.title('Scikit-learn KMeans Clustering')
+                   label='Centroides')
+        plt.title('Clustering K-Means Scikit-learn')
         plt.legend()
         
         plt.tight_layout()
-        plt.savefig('kmeans_comparison.png')
+        plt.savefig('comparacion_kmeans.png')
         plt.close()
 
     def _compute_inertia(self, X, labels, centroids):
         """
-        Compute inertia (within-cluster sum of squares)
+        Calcular inercia (suma de cuadrados intra-cluster)
         """
         inertia = 0
         X_list = X.to_list() if isinstance(X, MLArray) else X
@@ -103,70 +103,70 @@ class TestKMeansVsSklearn(unittest.TestCase):
 
     def _plot_training_progress(self):
         """
-        Visualizes the training progress showing how centroids moved during training
+        Visualiza el progreso de entrenamiento mostrando cómo se movieron los centroides durante el entrenamiento
         """
         n_plots = min(5, len(self.custom_kmeans.centroid_history))
         fig, axes = plt.subplots(1, n_plots, figsize=(4*n_plots, 4))
         
-        # If we only have one subplot, wrap it in a list
+        # Si solo tenemos un subplot, envolverlo en una lista
         if n_plots == 1:
             axes = [axes]
         
-        # Select iterations to plot
+        # Seleccionar iteraciones para graficar
         if len(self.custom_kmeans.centroid_history) <= n_plots:
             plot_iterations = range(len(self.custom_kmeans.centroid_history))
         else:
-            # Select evenly spaced iterations including first and last
+            # Seleccionar iteraciones espaciadas uniformemente incluyendo primera y última
             plot_iterations = np.linspace(0, len(self.custom_kmeans.centroid_history)-1, n_plots, dtype=int)
         
-        # Convert data to numpy for easier plotting
+        # Convertir datos a numpy para graficar más fácil
         X_array = np.array(self.X_ml.to_list())
         
-        # Plot each selected iteration
+        # Graficar cada iteración seleccionada
         for idx, iter_idx in enumerate(plot_iterations):
             ax = axes[idx]
             centroids = np.array(self.custom_kmeans.centroid_history[iter_idx])
             
-            # Plot data points
+            # Graficar puntos de datos
             if iter_idx == len(self.custom_kmeans.centroid_history) - 1:
-                # For the final iteration, color points by cluster
+                # Para la iteración final, colorear puntos por cluster
                 labels = np.array(self.custom_kmeans.labels_.to_list())
                 scatter = ax.scatter(X_array[:, 0], X_array[:, 1], c=labels, 
                                 cmap='viridis', alpha=0.6, s=50)
             else:
-                # For earlier iterations, show all points in grey
+                # Para iteraciones anteriores, mostrar todos los puntos en gris
                 ax.scatter(X_array[:, 0], X_array[:, 1], c='grey', 
                         alpha=0.3, s=50)
             
-            # Plot centroids
+            # Graficar centroides
             ax.scatter(centroids[:, 0], centroids[:, 1], c='red', 
-                    marker='x', s=200, linewidth=3, label='Centroids')
+                    marker='x', s=200, linewidth=3, label='Centroides')
             
-            # Add iteration number
-            ax.set_title(f'Iteration {iter_idx}')
+            # Agregar número de iteración
+            ax.set_title(f'Iteración {iter_idx}')
             
-            # If first subplot, add legend
+            # Si es el primer subplot, agregar leyenda
             if idx == 0:
                 ax.legend()
         
         plt.tight_layout()
-        plt.savefig('kmeans_training_progress.png')
+        plt.savefig('progreso_entrenamiento_kmeans.png')
         plt.close()
 
     def test_compare_clustering(self):
         """
-        Train and compare both implementations
+        Entrenar y comparar ambas implementaciones
         """
-        print("\nFitting custom KMeans...")
+        print("\nAjustando K-Means personalizado...")
         custom_labels = self.custom_kmeans.fit_predict(self.X_ml)
         
-        # Plot training progress
+        # Graficar progreso de entrenamiento
         self._plot_training_progress()
         
-        print("Fitting scikit-learn KMeans...")
+        print("Ajustando K-Means scikit-learn...")
         sklearn_labels = self.sklearn_kmeans.fit_predict(self.X)
         
-        # Plot clustering results
+        # Graficar resultados de clustering
         self._plot_clusters(custom_labels, sklearn_labels)
 
 if __name__ == '__main__':

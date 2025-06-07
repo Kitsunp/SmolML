@@ -5,40 +5,40 @@ import math
 
 """
 /////////////////////
-/// DECISION TREE ///
+/// ÁRBOL DE DECISIÓN ///
 /////////////////////
 """
 
 class DecisionNode:
     """
-    Node in decision tree that handles splitting logic.
-    Can be either internal node (with split rule) or leaf (with prediction).
+    Nodo en árbol de decisión que maneja la lógica de división.
+    Puede ser nodo interno (con regla de división) u hoja (con predicción).
     """
     def __init__(self, feature_idx=None, threshold=None, left=None, right=None, value=None):
-        self.feature_idx = feature_idx  # Index of feature to split on
-        self.threshold = threshold      # Value to split feature on
-        self.left = left               # Left subtree (feature <= threshold)
-        self.right = right             # Right subtree (feature > threshold)
-        self.value = value             # Prediction value (for leaf nodes)
+        self.feature_idx = feature_idx  # Índice de característica para dividir
+        self.threshold = threshold      # Valor para dividir la característica
+        self.left = left               # Subárbol izquierdo (característica <= umbral)
+        self.right = right             # Subárbol derecho (característica > umbral)
+        self.value = value             # Valor de predicción (para nodos hoja)
 
     def __repr__(self):
         if self.value is not None:
-            return f"Leaf(value={self.value})"
-        return f"Node(feature={self.feature_idx}, threshold={self.threshold:.4f})"
+            return f"Hoja(valor={self.value})"
+        return f"Nodo(característica={self.feature_idx}, umbral={self.threshold:.4f})"
 
 class DecisionTree:
     """
-    Decision Tree implementation supporting both classification and regression.
-    Uses binary splitting based on feature thresholds.
+    Implementación de Árbol de Decisión que soporta tanto clasificación como regresión.
+    Usa división binaria basada en umbrales de características.
     """
     def __init__(self, max_depth=None, min_samples_split=2, min_samples_leaf=1, task="classification"):
         """
-        Initialize decision tree with stopping criteria.
+        Inicializa árbol de decisión con criterios de parada.
         
-        max_depth: Maximum tree depth to prevent overfitting
-        min_samples_split: Minimum samples required to split node
-        min_samples_leaf: Minimum samples required in leaf nodes
-        task: "classification" or "regression"
+        max_depth: Profundidad máxima del árbol para prevenir sobreajuste
+        min_samples_split: Mínimo de muestras requeridas para dividir nodo
+        min_samples_leaf: Mínimo de muestras requeridas en nodos hoja
+        task: "classification" o "regression"
         """
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
@@ -48,7 +48,7 @@ class DecisionTree:
 
     def fit(self, X, y):
         """
-        Build decision tree by recursively splitting data.
+        Construye árbol de decisión dividiendo recursivamente los datos.
         """
         if not isinstance(X, MLArray):
             X = MLArray(X)
@@ -60,30 +60,30 @@ class DecisionTree:
 
     def _grow_tree(self, X, y, depth=0):
         """
-        Recursively grows tree by finding best splits.
+        Hace crecer el árbol recursivamente encontrando las mejores divisiones.
         """
         n_samples = len(X)
         
-        # Check stopping criteria
+        # Verificar criterios de parada
         if (self.max_depth is not None and depth >= self.max_depth or 
             n_samples < self.min_samples_split or 
             self._is_pure(y)):
             return DecisionNode(value=self._leaf_value(y))
 
-        # Find best split
+        # Encontrar mejor división
         best_feature, best_threshold = self._find_best_split(X, y)
         
-        if best_feature is None:  # No valid split found
+        if best_feature is None:  # No se encontró división válida
             return DecisionNode(value=self._leaf_value(y))
 
-        # Split data
+        # Dividir datos
         left_idxs, right_idxs = self._split_data(X, best_feature, best_threshold)
         
-        # Check min_samples_leaf
+        # Verificar min_samples_leaf
         if len(left_idxs) < self.min_samples_leaf or len(right_idxs) < self.min_samples_leaf:
             return DecisionNode(value=self._leaf_value(y))
 
-        # Create child nodes
+        # Crear nodos hijos
         left_X = [X[i] for i in left_idxs]
         right_X = [X[i] for i in right_idxs]
         left_y = [y[i] for i in left_idxs]
@@ -96,8 +96,8 @@ class DecisionTree:
 
     def _find_best_split(self, X, y):
         """
-        Finds best feature and threshold for splitting data.
-        Uses information gain for classification, MSE for regression.
+        Encuentra la mejor característica y umbral para dividir los datos.
+        Usa ganancia de información para clasificación, MSE para regresión.
         """
         best_gain = -float('inf')
         best_feature = None
@@ -128,7 +128,7 @@ class DecisionTree:
 
     def _split_data(self, X, feature_idx, threshold):
         """
-        Splits data based on feature and threshold.
+        Divide datos basándose en característica y umbral.
         """
         left_idxs = []
         right_idxs = []
@@ -143,9 +143,9 @@ class DecisionTree:
 
     def _calculate_gain(self, parent, left, right):
         """
-        Calculates gain from split:
-        - Information gain for classification
-        - Reduction in MSE for regression
+        Calcula ganancia de la división:
+        - Ganancia de información para clasificación
+        - Reducción en MSE para regresión
         """
         if self.task == "classification":
             return self._information_gain(parent, left, right)
@@ -153,7 +153,7 @@ class DecisionTree:
 
     def _information_gain(self, parent, left, right):
         """
-        Calculates information gain using entropy.
+        Calcula ganancia de información usando entropía.
         """
         def entropy(y):
             counts = Counter(y)
@@ -168,7 +168,7 @@ class DecisionTree:
 
     def _mse_reduction(self, parent, left, right):
         """
-        Calculates reduction in MSE.
+        Calcula reducción en MSE.
         """
         def mse(y):
             mean = sum(y)/len(y)
@@ -182,7 +182,7 @@ class DecisionTree:
 
     def _split_data(self, X, feature_idx, threshold):
         """
-        Splits data based on feature and threshold.
+        Divide datos basándose en característica y umbral.
         """
         left_idxs = [i for i, row in enumerate(X) if row[feature_idx] <= threshold]
         right_idxs = [i for i, row in enumerate(X) if row[feature_idx] > threshold]
@@ -190,15 +190,15 @@ class DecisionTree:
 
     def _is_pure(self, y):
         """
-        Checks if node is pure (all same class/value).
+        Verifica si el nodo es puro (toda la misma clase/valor).
         """
         return len(set(y)) == 1
 
     def _leaf_value(self, y):
         """
-        Determines prediction value for leaf node:
-        - Most common class for classification
-        - Mean value for regression
+        Determina valor de predicción para nodo hoja:
+        - Clase más común para clasificación
+        - Valor medio para regresión
         """
         if self.task == "classification":
             return max(set(y), key=y.count)
@@ -206,7 +206,7 @@ class DecisionTree:
 
     def predict(self, X):
         """
-        Makes predictions using trained tree.
+        Hace predicciones usando árbol entrenado.
         """
         if not isinstance(X, MLArray):
             X = MLArray(X)
@@ -215,9 +215,9 @@ class DecisionTree:
 
     def _traverse_tree(self, x, node):
         """
-        Traverses tree to make prediction for single sample.
+        Recorre árbol para hacer predicción para una sola muestra.
         """
-        if node.value is not None:  # Leaf node
+        if node.value is not None:  # Nodo hoja
             return node.value
 
         if x[node.feature_idx] <= node.threshold:
@@ -226,7 +226,7 @@ class DecisionTree:
     
     def __repr__(self):
         """
-        Returns string representation of decision tree with structure and memory information.
+        Retorna representación en cadena de árbol de decisión con información de estructura y memoria.
         """
         try:
             import os
@@ -234,42 +234,42 @@ class DecisionTree:
         except Exception:
             terminal_width = 80
             
-        header = f"Decision Tree ({self.task.title()})"
+        header = f"Árbol de Decisión ({self.task.title()})"
         separator = "=" * terminal_width
         
-        # Get size information
+        # Obtener información de tamaño
         size_info = memory.calculate_decision_tree_size(self)
         
-        # Model parameters
+        # Parámetros del modelo
         params = [
-            f"Max Depth: {self.max_depth if self.max_depth is not None else 'None'}",
-            f"Min Samples Split: {self.min_samples_split}",
-            f"Min Samples Leaf: {self.min_samples_leaf}",
-            f"Task: {self.task}"
+            f"Profundidad Máxima: {self.max_depth if self.max_depth is not None else 'Ninguna'}",
+            f"Mínimo Muestras División: {self.min_samples_split}",
+            f"Mínimo Muestras Hoja: {self.min_samples_leaf}",
+            f"Tarea: {self.task}"
         ]
         
-        # Tree structure information
+        # Información de estructura del árbol
         if self.root:
             structure_info = [
-                "Tree Structure:",
-                f"  Internal Nodes: {size_info['tree_structure']['internal_nodes']}",
-                f"  Leaf Nodes: {size_info['tree_structure']['leaf_nodes']}",
-                f"  Max Depth: {size_info['tree_structure']['max_depth']}",
-                f"  Total Nodes: {size_info['tree_structure']['internal_nodes'] + size_info['tree_structure']['leaf_nodes']}"
+                "Estructura del Árbol:",
+                f"  Nodos Internos: {size_info['tree_structure']['internal_nodes']}",
+                f"  Nodos Hoja: {size_info['tree_structure']['leaf_nodes']}",
+                f"  Profundidad Máxima: {size_info['tree_structure']['max_depth']}",
+                f"  Nodos Totales: {size_info['tree_structure']['internal_nodes'] + size_info['tree_structure']['leaf_nodes']}"
             ]
         else:
-            structure_info = ["Tree not yet trained"]
+            structure_info = ["Árbol aún no entrenado"]
         
-        # Memory usage
-        memory_info = ["Memory Usage:"]
-        memory_info.append(f"  Base Tree: {memory.format_size(size_info['base_size'])}")
+        # Uso de memoria
+        memory_info = ["Uso de Memoria:"]
+        memory_info.append(f"  Árbol Base: {memory.format_size(size_info['base_size'])}")
         if self.root:
-            memory_info.append(f"  Tree Structure: {memory.format_size(size_info['tree_structure']['total'])}")
-        memory_info.append(f"Total Memory: {memory.format_size(size_info['total'])}")
+            memory_info.append(f"  Estructura del Árbol: {memory.format_size(size_info['tree_structure']['total'])}")
+        memory_info.append(f"Memoria Total: {memory.format_size(size_info['total'])}")
         
         return (
             f"\n{header}\n{separator}\n\n"
-            + "Parameters:\n" + "\n".join(f"  {param}" for param in params)
+            + "Parámetros:\n" + "\n".join(f"  {param}" for param in params)
             + "\n\n" + "\n".join(structure_info)
             + "\n\n" + "\n".join(memory_info)
             + f"\n{separator}\n"

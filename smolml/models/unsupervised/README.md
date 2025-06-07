@@ -1,74 +1,74 @@
-# SmolML - K-Means: Finding Groups in Your Data!
+# SmolML - K-Means: ¡Encontrando Grupos en tus Datos!
 
-So far, we've looked at models that learn from labeled data (**supervised learning**): predicting house prices (*regression*) or classifying images (*classification*). But what if you just have a big pile of data and no labels? How can you find interesting structures or groups within it? Welcome to **Unsupervised Learning**, and one of its most popular tools: **K-Means Clustering**!
+Hasta ahora, hemos visto modelos que aprenden de datos etiquetados (**aprendizaje supervisado (supervised learning)**): predecir precios de casas (*regresión*) o clasificar imágenes (*clasificación*). Pero ¿qué pasa si solo tienes un gran montón de datos y no hay etiquetas? ¿Cómo puedes encontrar estructuras o grupos interesantes dentro de ellos? ¡Bienvenido al **Aprendizaje No Supervisado (Unsupervised Learning)**, y una de sus herramientas más populares: **Clustering K-Means**!
 
-Imagine you have data points scattered on a graph. K-Means tries to automatically group these points into a specified number (`k`) of clusters, without any prior knowledge of what those groups should be. It's like trying to find natural groupings of customers based on their purchasing behavior, or grouping stars based on their brightness and temperature.
+Imagina que tienes puntos de datos esparcidos en un gráfico. K-Means trata de agrupar automáticamente estos puntos en un número especificado (`k`) de clusters, sin conocimiento previo de qué deberían ser esos grupos. Es como tratar de encontrar agrupaciones naturales de clientes basándose en su comportamiento de compra, o agrupar estrellas basándose en su brillo y temperatura.
 
-This part of SmolML implements the K-Means algorithm using our trusty `MLArray` class. Let's see how it works!
+¡Esta parte de SmolML implementa el algoritmo K-Means usando nuestra confiable clase `MLArray`. Veamos cómo funciona!
 
-## The K-Means Algorithm: A Cluster Dance!
+## El Algoritmo K-Means: ¡Una Danza de Clusters!
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/1d85e199-e5d1-4ff0-a70b-e1d8ab970e13" width="600">
 </div>
 
-K-Means aims to partition your data into `k` distinct, non-overlapping clusters. It does this by finding `k` central points, called **centroids**, and assigning each data point to the nearest centroid. The core idea is an iterative process, a sort of "dance" between assigning points and updating the centers:
+K-Means busca particionar tus datos en `k` clusters distintos y no superpuestos. Hace esto encontrando `k` puntos centrales, llamados **centroides (centroids)**, y asignando cada punto de datos al centroide más cercano. La idea central es un proceso iterativo, una especie de "danza" entre asignar puntos y actualizar los centros:
 
-1.  **Initialization - Pick Starting Points (`_initialize_centroids`):**
-    * First, we need to decide how many clusters (`k`, or `n_clusters` in our code) we want to find. This is something *you* tell the algorithm.
-    * Then, we need initial guesses for the location of the `k` cluster centroids. A common way (and the one used here) is to simply pick `k` random data points from your dataset and call them the initial centroids. Think of this as randomly dropping `k` pins on your data map.
-    * **Code Connection:** The `_initialize_centroids` method handles this, randomly sampling `n_clusters` points from the input `X_train` to set the initial `self.centroids`. It also initializes `self.centroid_history` to track how these centers move.
+1.  **Inicialización - Elegir Puntos de Inicio (`_initialize_centroids`):**
+    * Primero, necesitamos decidir cuántos clusters (`k`, o `n_clusters` en nuestro código) queremos encontrar. Esto es algo que *tú* le dices al algoritmo.
+    * Luego, necesitamos conjeturas iniciales para la ubicación de los `k` centroides de cluster. Una manera común (y la que usamos aquí) es simplemente elegir `k` puntos de datos aleatorios de tu conjunto de datos y llamarlos los centroides iniciales. Piensa en esto como dejar caer aleatoriamente `k` alfileres en tu mapa de datos.
+    * **Conexión de Código:** El método `_initialize_centroids` maneja esto, muestreando aleatoriamente `n_clusters` puntos de la entrada `X_train` para establecer los `self.centroids` iniciales. También inicializa `self.centroid_history` para rastrear cómo se mueven estos centros.
 
-2.  **Assignment Step - Find Your Closest Center (`_assign_clusters`):**
-    * Now, for *every* data point, calculate its distance to *each* of the `k` centroids. The most common distance measure is the good old **Euclidean distance** (the straight-line distance).
-    * Assign each data point to the cluster whose centroid it is closest to. Every point now belongs to one of the `k` clusters.
-    * **Code Connection:** The `_compute_distances` method calculates all these distances efficiently. It cleverly uses `MLArray`'s broadcasting and vectorized operations (`reshape`, subtraction, element-wise multiplication, `sum`, `sqrt`) to avoid slow Python loops. The `_assign_clusters` method then iterates through the resulting distance matrix for each point, finds the index (`cluster_idx`) of the minimum distance, and stores these assignments in `self.labels_`.
+2.  **Paso de Asignación - Encontrar tu Centro Más Cercano (`_assign_clusters`):**
+    * Ahora, para *cada* punto de datos, calcula su distancia a *cada* uno de los `k` centroides. La medida de distancia más común es la buena **distancia Euclidiana (Euclidean distance)** (la distancia en línea recta).
+    * Asigna cada punto de datos al cluster cuyo centroide esté más cerca de él. Cada punto ahora pertenece a uno de los `k` clusters.
+    * **Conexión de Código:** El método `_compute_distances` calcula todas estas distancias eficientemente. Usa inteligentemente las operaciones de broadcasting y vectorizadas de `MLArray` (`reshape`, sustracción, multiplicación elemento por elemento, `sum`, `sqrt`) para evitar bucles lentos de Python. El método `_assign_clusters` luego itera a través de la matriz de distancias resultante para cada punto, encuentra el índice (`cluster_idx`) de la distancia mínima, y almacena estas asignaciones en `self.labels_`.
 
-3.  **Update Step - Move the Center (`_update_centroids`):**
-    * The initial centroids were just random guesses. Now that we have points assigned to clusters, we can calculate *better* centroid locations.
-    * For each cluster, find the new centroid by calculating the **mean** (average position) of all the data points assigned to that cluster in the previous step. Imagine finding the "center of gravity" for all points in a cluster – that's the new centroid position.
-    * **Code Connection:** The `_update_centroids` method does this. It groups points based on `self.labels_`, calculates the mean for each dimension within each group, and updates `self.centroids`. It also handles cases where a cluster might become empty (in which case the centroid stays put).
+3.  **Paso de Actualización - Mover el Centro (`_update_centroids`):**
+    * Los centroides iniciales eran solo conjeturas aleatorias. Ahora que tenemos puntos asignados a clusters, podemos calcular ubicaciones de centroides *mejores*.
+    * Para cada cluster, encontrar el nuevo centroide calculando la **media (mean)** (posición promedio) de todos los puntos de datos asignados a ese cluster en el paso anterior. Imagina encontrar el "centro de gravedad" para todos los puntos en un cluster – esa es la nueva posición del centroide.
+    * **Conexión de Código:** El método `_update_centroids` hace esto. Agrupa puntos basándose en `self.labels_`, calcula la media para cada dimensión dentro de cada grupo, y actualiza `self.centroids`. También maneja casos donde un cluster podría quedar vacío (en cuyo caso el centroide se queda quieto).
 
-4.  **Repeat!**
-    * Now that the centroids have moved, the distances have changed! Go back to the **Assignment Step (2)** and re-assign all data points to their *new* nearest centroid.
-    * Then, go back to the **Update Step (3)** and recalculate the centroid positions based on the new assignments.
-    * Keep repeating this assign-and-update dance.
+4.  **¡Repetir!**
+    * Ahora que los centroides se han movido, ¡las distancias han cambiado! Volver al **Paso de Asignación (2)** y reasignar todos los puntos de datos a su *nuevo* centroide más cercano.
+    * Luego, volver al **Paso de Actualización (3)** y recalcular las posiciones de los centroides basándose en las nuevas asignaciones.
+    * Seguir repitiendo esta danza de asignar-y-actualizar.
 
-**When Does the Dance Stop? (Convergence)**
+**¿Cuándo Para la Danza? (Convergencia)**
 
-The algorithm keeps iterating until one of these happens:
-* **Centroids Settle Down:** The centroids stop moving significantly between iterations. The total distance the centroids moved is less than a small threshold (`tol`). (Checked within `_update_centroids`).
-* **Maximum Iterations Reached:** We hit the predefined maximum number of iterations (`max_iters`) to prevent the algorithm from running forever if it doesn't converge quickly.
+El algoritmo sigue iterando hasta que sucede una de estas cosas:
+* **Los Centroides se Asientan:** Los centroides dejan de moverse significativamente entre iteraciones. La distancia total que movieron los centroides es menor que un umbral pequeño (`tol`). (Verificado dentro de `_update_centroids`).
+* **Se Alcanzan las Iteraciones Máximas:** Llegamos al número máximo predefinido de iteraciones (`max_iters`) para prevenir que el algoritmo corra para siempre si no converge rápidamente.
 
-**The Result:**
+**El Resultado:**
 
-Once the algorithm stops (converges), you have:
-* `self.centroids`: The final positions of the `k` cluster centers.
-* `self.labels_`: An array indicating which cluster (0 to k-1) each of your input data points belongs to.
+Una vez que el algoritmo se detiene (converge), tienes:
+* `self.centroids`: Las posiciones finales de los `k` centros de cluster.
+* `self.labels_`: Un array indicando a qué cluster (0 a k-1) pertenece cada uno de tus puntos de datos de entrada.
 
-## Implementation in SmolML (`KMeans` class)
+## Implementación en SmolML (clase `KMeans`)
 
-The `KMeans` class in `kmeans.py` wraps this entire process:
-* **`__init__(self, n_clusters, max_iters, tol)`:** You initialize the model by telling it how many clusters to find (`n_clusters`), the maximum iterations (`max_iters`), and the convergence tolerance (`tol`).
-* **`fit(self, X_train)`:** This is the main training method. It takes your data (`X_train`, expected as an `MLArray` or list-of-lists) and runs the iterative assign-and-update loop described above, calling the internal methods (`_initialize_centroids`, `_compute_distances`, `_assign_clusters`, `_update_centroids`) until convergence. It stores the final centroids and labels internally.
-* **`predict(self, X)`:** After fitting, you can use this method to assign *new* data points (`X`) to the nearest learned centroid (`self.centroids`).
-* **`fit_predict(self, X_train)`:** A handy shortcut that calls `fit` and then immediately `predict` on the same data, returning the cluster labels for the training data.
+La clase `KMeans` en `kmeans.py` envuelve todo este proceso:
+* **`__init__(self, n_clusters, max_iters, tol)`:** Inicializas el modelo diciéndole cuántos clusters encontrar (`n_clusters`), las iteraciones máximas (`max_iters`), y la tolerancia de convergencia (`tol`).
+* **`fit(self, X_train)`:** Este es el método principal de entrenamiento. Toma tus datos (`X_train`, esperado como `MLArray` o lista-de-listas) y ejecuta el bucle iterativo de asignar-y-actualizar descrito arriba, llamando los métodos internos (`_initialize_centroids`, `_compute_distances`, `_assign_clusters`, `_update_centroids`) hasta convergencia. Almacena los centroides finales y etiquetas internamente.
+* **`predict(self, X)`:** Después del ajuste, puedes usar este método para asignar *nuevos* puntos de datos (`X`) al centroide aprendido más cercano (`self.centroids`).
+* **`fit_predict(self, X_train)`:** Un atajo conveniente que llama `fit` y luego inmediatamente `predict` en los mismos datos, retornando las etiquetas de cluster para los datos de entrenamiento.
 
-## Example Usage
+## Ejemplo de Uso
 
-Let's find 3 clusters in some simple 2D data:
+Encontremos 3 clusters en algunos datos 2D simples:
 
 ```python
 from smolml.cluster import KMeans
 from smolml.core.ml_array import MLArray
 import random
 
-# Generate some synthetic 2D data around 3 centers
+# Generar algunos datos sintéticos 2D alrededor de 3 centros
 def generate_data(n_samples, centers):
     data = []
     for _ in range(n_samples):
         center = random.choice(centers)
-        # Add some random noise around the center
+        # Agregar algo de ruido aleatorio alrededor del centro
         point = [center[0] + random.gauss(0, 0.5),
                  center[1] + random.gauss(0, 0.5)]
         data.append(point)
@@ -77,37 +77,37 @@ def generate_data(n_samples, centers):
 centers = [[2, 2], [8, 3], [5, 8]]
 X_data = generate_data(150, centers)
 
-# Convert to MLArray
+# Convertir a MLArray
 X = MLArray(X_data)
 
-# Initialize and fit K-Means
-k = 3 # We want to find 3 clusters
+# Inicializar y ajustar K-Means
+k = 3 # Queremos encontrar 3 clusters
 kmeans = KMeans(n_clusters=k, max_iters=100, tol=1e-4)
 
-print("Fitting K-Means...")
+print("Ajustando K-Means...")
 kmeans.fit(X)
 
-# Get the results
+# Obtener los resultados
 final_centroids = kmeans.centroids
 cluster_labels = kmeans.labels_
 
-print("\nK-Means fitting complete!")
-print(f"Final Centroid positions:\n{final_centroids}")
-# print(f"Cluster labels for first 10 points: {cluster_labels.to_list()[:10]}")
-print(f"Number of points in each cluster:")
+print("\n¡Ajuste de K-Means completo!")
+print(f"Posiciones finales de Centroides:\n{final_centroids}")
+# print(f"Etiquetas de cluster para los primeros 10 puntos: {cluster_labels.to_list()[:10]}")
+print(f"Número de puntos en cada cluster:")
 labels_list = cluster_labels.to_list()
 for i in range(k):
-    print(f"  Cluster {i}: {labels_list.count(i)} points")
+    print(f"  Cluster {i}: {labels_list.count(i)} puntos")
 
-# You could now use these labels or centroids for further analysis or visualization!
-# For example, predict the cluster for a new point:
+# ¡Ahora podrías usar estas etiquetas o centroides para análisis adicional o visualización!
+# Por ejemplo, predecir el cluster para un nuevo punto:
 new_point = MLArray([[6, 6]])
 predicted_cluster = kmeans.predict(new_point)
-print(f"\nNew point {new_point.to_list()} assigned to cluster: {predicted_cluster.to_list()[0]}")
+print(f"\nNuevo punto {new_point.to_list()} asignado al cluster: {predicted_cluster.to_list()[0]}")
 ```
 
-> (Note: Because K-Means starts with random initial centroids, you might get slightly different clustering results each time you run it. Running it multiple times and choosing the best result based on some metric is a common practice, though not implemented here.)
+> (Nota: Porque K-Means empieza con centroides iniciales aleatorios, podrías obtener resultados de clustering ligeramente diferentes cada vez que lo ejecutes. Ejecutarlo múltiples veces y elegir el mejor resultado basándose en alguna métrica es una práctica común, aunque no está implementado aquí.)
 
-## End of the dance
+## Final de la danza
 
-K-Means is a foundational unsupervised algorithm, fantastic for exploring unlabeled data and discovering potential groupings. It's intuitive, relatively simple to implement (especially with tools like our `MLArray` for efficient math!), and often provides valuable insights into the hidden structure of your data. It's a great first step into the world of unsupervised learning!
+K-Means es un algoritmo no supervisado fundamental, fantástico para explorar datos sin etiquetas y descubrir agrupaciones potenciales. Es intuitivo, relativamente simple de implementar (¡especialmente con herramientas como nuestro `MLArray` para matemáticas eficientes!), y frecuentemente proporciona insights valiosos sobre la estructura oculta de tus datos. ¡Es un gran primer paso hacia el mundo del aprendizaje no supervisado!

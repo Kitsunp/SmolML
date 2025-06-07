@@ -8,19 +8,19 @@ import smolml.utils.memory as memory
 
 """
 //////////////////
-/// REGRESSION ///
+/// REGRESIÓN ///
 //////////////////
 """
 
 class Regression:
     """
-    Base class for regression algorithms implementing common functionality.
-    Provides framework for fitting models using gradient descent optimization.
-    Specific regression types should inherit from this class.
+    Clase base para algoritmos de regresión implementando funcionalidad común.
+    Proporciona framework para ajustar modelos usando optimización de descenso de gradiente.
+    Los tipos específicos de regresión deben heredar de esta clase.
     """
     def __init__(self, input_size: int, loss_function: callable = losses.mse_loss, optimizer: optimizers.Optimizer = optimizers.SGD, initializer: initializers.WeightInitializer = initializers.XavierUniform):
         """
-        Initializes base regression model with common parameters.
+        Inicializa modelo de regresión base con parámetros comunes.
         """
         self.input_size = input_size
         self.loss_function = loss_function
@@ -31,34 +31,34 @@ class Regression:
 
     def fit(self, X, y, iterations: int = 100, verbose: bool = True, print_every: int = 1):
         """
-        Trains the regression model using gradient descent.
+        Entrena el modelo de regresión usando descenso de gradiente.
         """
         X, y = MLArray.ensure_array(X, y)
         losses = []
         for i in range(iterations):
-            # Make prediction 
+            # Hacer predicción 
             y_pred = self.predict(X)
-            # Compute loss
+            # Calcular pérdida
             loss = self.loss_function(y, y_pred)
             losses.append(loss.data.data)
-            # Backward pass
+            # Paso hacia atrás
             loss.backward()
 
-            # Update parameters
+            # Actualizar parámetros
             self.weights, self.bias = self.optimizer.update(self, self.__class__.__name__, param_names=("weights", "bias"))
 
-            # Reset gradients
+            # Reiniciar gradientes
             X, y = self.restart(X, y)
 
             if verbose:
                 if (i+1) % print_every == 0:
-                    print(f"Iteration {i + 1}/{iterations}, Loss: {loss.data}")
+                    print(f"Iteración {i + 1}/{iterations}, Pérdida: {loss.data}")
 
         return losses
 
     def restart(self, X, y):
         """
-        Resets gradients for all parameters and data for next iteration.
+        Reinicia gradientes para todos los parámetros y datos para la siguiente iteración.
         """
         X = X.restart()
         y = y.restart()
@@ -68,15 +68,15 @@ class Regression:
     
     def predict(self, X):
         """
-        Abstract method for making predictions.
-        Must be implemented by specific regression classes.
+        Método abstracto para hacer predicciones.
+        Debe ser implementado por clases específicas de regresión.
         """
-        raise NotImplementedError("Regression is only base class for Regression algorithms, use one of the classes that inherit from it.")
+        raise NotImplementedError("Regression es solo clase base para algoritmos de Regresión, usa una de las clases que heredan de ella.")
     
     def __repr__(self):
         """
-        Returns a string representation of the regression model.
-        Includes model type, parameters, optimizer details, and memory usage.
+        Retorna una representación en cadena del modelo de regresión.
+        Incluye tipo de modelo, parámetros, detalles del optimizador y uso de memoria.
         """
         try:
             import os
@@ -84,123 +84,123 @@ class Regression:
         except Exception:
             terminal_width = 80
 
-        # Create header
-        header = f"{self.__class__.__name__} Model"
+        # Crear encabezado
+        header = f"Modelo {self.__class__.__name__}"
         separator = "=" * terminal_width
         
-        # Get size information
+        # Obtener información de tamaño
         size_info = memory.calculate_regression_size(self)
         
-        # Model structure
+        # Estructura del modelo
         structure_info = [
-            f"Input Size: {self.input_size}",
-            f"Loss Function: {self.loss_function.__name__}",
-            f"Optimizer: {self.optimizer.__class__.__name__}(learning_rate={self.optimizer.learning_rate})"
+            f"Tamaño de Entrada: {self.input_size}",
+            f"Función de Pérdida: {self.loss_function.__name__}",
+            f"Optimizador: {self.optimizer.__class__.__name__}(learning_rate={self.optimizer.learning_rate})"
         ]
         
-        # Parameters count
+        # Conteo de parámetros
         total_params = self.weights.size() + self.bias.size()
         
-        # Memory breakdown
-        memory_info = ["Memory Usage:"]
+        # Desglose de memoria
+        memory_info = ["Uso de Memoria:"]
         memory_info.append(
-            f"  Parameters: {memory.format_size(size_info['parameters']['total'])} "
-            f"(weights: {memory.format_size(size_info['parameters']['weights_size'])}, "
-            f"bias: {memory.format_size(size_info['parameters']['bias_size'])})"
+            f"  Parámetros: {memory.format_size(size_info['parameters']['total'])} "
+            f"(pesos: {memory.format_size(size_info['parameters']['weights_size'])}, "
+            f"sesgo: {memory.format_size(size_info['parameters']['bias_size'])})"
         )
         
-        # Add optimizer state information if it exists
+        # Agregar información de estado del optimizador si existe
         if size_info['optimizer']['state']:
             opt_size = sum(size_info['optimizer']['state'].values())
-            memory_info.append(f"  Optimizer State: {memory.format_size(opt_size)}")
+            memory_info.append(f"  Estado del Optimizador: {memory.format_size(opt_size)}")
             for key, value in size_info['optimizer']['state'].items():
                 memory_info.append(f"    {key}: {memory.format_size(value)}")
         
-        memory_info.append(f"  Base Objects: {memory.format_size(size_info['optimizer']['size'])}")
-        memory_info.append(f"Total Memory: {memory.format_size(size_info['total'])}")
+        memory_info.append(f"  Objetos Base: {memory.format_size(size_info['optimizer']['size'])}")
+        memory_info.append(f"Memoria Total: {memory.format_size(size_info['total'])}")
         
-        # Combine all parts
+        # Combinar todas las partes
         return (
             f"\n{header}\n{separator}\n\n"
             + "\n".join(structure_info)
-            + f"\n\nTotal Parameters: {total_params:,}\n\n"
+            + f"\n\nParámetros Totales: {total_params:,}\n\n"
             + "\n".join(memory_info)
             + f"\n{separator}\n"
         )
 
 class LinearRegression(Regression):
    """
-   Implements linear regression using gradient descent optimization.
-   The model learns to fit: y = X @ weights + bias
+   Implementa regresión lineal usando optimización de descenso de gradiente.
+   El modelo aprende a ajustar: y = X @ weights + bias
    """
    def __init__(self, input_size: int, loss_function: callable = losses.mse_loss, optimizer: optimizers.Optimizer = optimizers.SGD, initializer: initializers.WeightInitializer = initializers.XavierUniform):
        """
-       Initializes regression model with training parameters.
+       Inicializa modelo de regresión con parámetros de entrenamiento.
        """
        super().__init__(input_size, loss_function, optimizer, initializer)
 
    def predict(self, X):
        """
-       Makes predictions using linear model equation.
+       Hace predicciones usando ecuación del modelo lineal.
        """
        if not isinstance(X, MLArray):
-            raise TypeError(f"Input data must be MLArray, not {type(X)}")
+            raise TypeError(f"Los datos de entrada deben ser MLArray, no {type(X)}")
        return X @ self.weights + self.bias
 
 class PolynomialRegression(Regression):
    """
-   Extends linear regression to fit polynomial relationships.
-   Transforms features into polynomial terms before fitting.
+   Extiende regresión lineal para ajustar relaciones polinomiales.
+   Transforma características en términos polinomiales antes del ajuste.
    """
    def __init__(self, input_size: int, degree: int, loss_function: callable = losses.mse_loss, optimizer: optimizers.Optimizer = optimizers.SGD, initializer: initializers.WeightInitializer = initializers.XavierUniform):
        """
-       Initializes polynomial model with degree and training parameters.
+       Inicializa modelo polinomial con grado y parámetros de entrenamiento.
        """
-       # Initialize with degree for number of weights needed
+       # Inicializar con grado para número de pesos necesarios
        super().__init__(degree, loss_function, optimizer, initializer)
        self.degree = degree
        
    def transform_features(self, X):
        """
-       Creates polynomial features up to specified degree.
-       For input X and degree 2, outputs [X, X^2].
+       Crea características polinomiales hasta el grado especificado.
+       Para entrada X y grado 2, produce [X, X^2].
        """
        features = [X]
        current = X
        for d in range(2, self.degree + 1):
-           # Use element-wise multiplication for power
+           # Usar multiplicación elemento por elemento para potencia
            current = current * X
            features.append(current)
            
-       # Create a new MLArray for concatenated features
+       # Crear un nuevo MLArray para características concatenadas
        new_data = []
        for i in range(len(X.data)):
            row = []
            for feature in features:
-               row.append(feature.data[i][0])  # Extract value from each feature
+               row.append(feature.data[i][0])  # Extraer valor de cada característica
            new_data.append(row)
            
        return MLArray(new_data)
 
    def predict(self, X):
        """
-       Makes predictions after transforming features to polynomial form.
+       Hace predicciones después de transformar características a forma polinomial.
        """
        if not isinstance(X, MLArray):
-            raise TypeError(f"Input data must be MLArray, not {type(X)}")
+            raise TypeError(f"Los datos de entrada deben ser MLArray, no {type(X)}")
        X_poly = self.transform_features(X)
        return X_poly @ self.weights + self.bias
 
    def fit(self, X, y, iterations: int = 100, verbose: bool = True, print_every: int = 1):
        """
-       Transforms features to polynomial form before training.
+       Transforma características a forma polinomial antes del entrenamiento.
        """
        X_poly = self.transform_features(X)
        return super().fit(X_poly, y, iterations, verbose, print_every)
    
    def __repr__(self):
         """
-        Enhanced repr for polynomial regression including degree information.
+        Repr mejorado para regresión polinomial incluyendo información de grado.
         """
         try:
             import os
@@ -208,46 +208,46 @@ class PolynomialRegression(Regression):
         except Exception:
             terminal_width = 80
 
-        # Create header
-        header = "Polynomial Regression Model"
+        # Crear encabezado
+        header = "Modelo de Regresión Polinomial"
         separator = "=" * terminal_width
         
-        # Get size information
+        # Obtener información de tamaño
         size_info = memory.calculate_regression_size(self)
         
-        # Model structure
+        # Estructura del modelo
         structure_info = [
-            f"Original Input Size: {self.input_size}",
-            f"Polynomial Degree: {self.degree}",
-            f"Loss Function: {self.loss_function.__name__}",
-            f"Optimizer: {self.optimizer.__class__.__name__}(learning_rate={self.optimizer.learning_rate})"
+            f"Tamaño de Entrada Original: {self.input_size}",
+            f"Grado Polinomial: {self.degree}",
+            f"Función de Pérdida: {self.loss_function.__name__}",
+            f"Optimizador: {self.optimizer.__class__.__name__}(learning_rate={self.optimizer.learning_rate})"
         ]
         
-        # Parameters count
+        # Conteo de parámetros
         total_params = self.weights.size() + self.bias.size()
         
-        # Memory breakdown
-        memory_info = ["Memory Usage:"]
+        # Desglose de memoria
+        memory_info = ["Uso de Memoria:"]
         memory_info.append(
-            f"  Parameters: {memory.format_size(size_info['parameters']['total'])} "
-            f"(weights: {memory.format_size(size_info['parameters']['weights_size'])}, "
-            f"bias: {memory.format_size(size_info['parameters']['bias_size'])})"
+            f"  Parámetros: {memory.format_size(size_info['parameters']['total'])} "
+            f"(pesos: {memory.format_size(size_info['parameters']['weights_size'])}, "
+            f"sesgo: {memory.format_size(size_info['parameters']['bias_size'])})"
         )
         
         if size_info['optimizer']['state']:
             opt_size = sum(size_info['optimizer']['state'].values())
-            memory_info.append(f"  Optimizer State: {memory.format_size(opt_size)}")
+            memory_info.append(f"  Estado del Optimizador: {memory.format_size(opt_size)}")
             for key, value in size_info['optimizer']['state'].items():
                 memory_info.append(f"    {key}: {memory.format_size(value)}")
         
-        memory_info.append(f"  Base Objects: {memory.format_size(size_info['optimizer']['size'])}")
-        memory_info.append(f"Total Memory: {memory.format_size(size_info['total'])}")
+        memory_info.append(f"  Objetos Base: {memory.format_size(size_info['optimizer']['size'])}")
+        memory_info.append(f"Memoria Total: {memory.format_size(size_info['total'])}")
         
-        # Combine all parts
+        # Combinar todas las partes
         return (
             f"\n{header}\n{separator}\n\n"
             + "\n".join(structure_info)
-            + f"\n\nTotal Parameters: {total_params:,}\n\n"
+            + f"\n\nParámetros Totales: {total_params:,}\n\n"
             + "\n".join(memory_info)
             + f"\n{separator}\n"
         )

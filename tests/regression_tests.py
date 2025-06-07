@@ -16,24 +16,24 @@ from smolml.models.regression import LinearRegression, PolynomialRegression
 
 class TestRegressionVisualization(unittest.TestCase):
     """
-    Test and visualize linear and polynomial regression implementations
-    with interactive epoch slider
+    Probar y visualizar implementaciones de regresión lineal y polinomial
+    con deslizador interactivo de épocas
     """
     
     def setUp(self):
         """
-        Set up common parameters and styling for tests
+        Configurar parámetros comunes y estilo para pruebas
         """
         np.random.seed(42)
         
-        # Training parameters
+        # Parámetros de entrenamiento
         self.iterations = 100
         self.epochs_to_store = [0, 5, 10, 25, 50, 99]
         
-        # Initialize optimizer
+        # Inicializar optimizador
         self.optimizer = optimizers.SGD(learning_rate=0.1)
         
-        # Set plotting style
+        # Establecer estilo de gráfico
         plt.rcParams['font.family'] = 'sans-serif'
         plt.rcParams['font.sans-serif'] = ['Arial']
         plt.rcParams['axes.facecolor'] = '#f0f0f0'
@@ -46,52 +46,52 @@ class TestRegressionVisualization(unittest.TestCase):
         plt.rcParams['grid.linewidth'] = 1
 
     def generate_linear_data(self, size=25):
-        """Generate data with linear relationship plus noise"""
+        """Generar datos con relación lineal más ruido"""
         X = randn(size, 1)
         y = X * 2 + 1 + randn(size, 1) * 0.1
         return X, y
 
     def generate_nonlinear_data(self, size=25):
-        """Generate data with polynomial relationship plus noise"""
+        """Generar datos con relación polinomial más ruido"""
         X = randn(size, 1)
         y = X * 2 + X * X * 3 + 1 + randn(size, 1) * 0.1
         return X, y
 
     def train_and_visualize(self, model, X, y, title):
-        """Train model and create interactive visualization"""
-        # Store predictions history
+        """Entrenar modelo y crear visualización interactiva"""
+        # Almacenar historial de predicciones
         predictions_history = []
         losses_history = []
         
-        # Initial prediction for storage
+        # Predicción inicial para almacenamiento
         y_pred = model.predict(X)
         predictions_history.append(y_pred.to_list())
         
-        # Training loop using model's fit method
+        # Loop de entrenamiento usando método fit del modelo
         losses = model.fit(X, y, iterations=self.iterations, verbose=True, print_every=10)
         
-        # Store predictions at specified epochs
-        X_eval = X.restart()  # Create fresh copy for evaluation
-        for epoch in self.epochs_to_store[1:]:  # Skip 0 as we already stored it
+        # Almacenar predicciones en épocas especificadas
+        X_eval = X.restart()  # Crear copia fresca para evaluación
+        for epoch in self.epochs_to_store[1:]:  # Saltar 0 ya que ya lo almacenamos
             y_pred = model.predict(X_eval)
             predictions_history.append(y_pred.to_list())
         
-        # Convert to numpy for plotting
+        # Convertir a numpy para graficar
         X_np = np.array(X.to_list())
         y_np = np.array(y.to_list())
         
-        # Sort for smooth curve plotting
+        # Ordenar para graficar curva suave
         sort_idx = np.argsort(X_np.flatten())
         X_np = X_np[sort_idx]
         y_np = y_np[sort_idx]
         
-        # Create plot
+        # Crear gráfico
         fig, ax = plt.subplots(figsize=(12, 8))
         plt.subplots_adjust(bottom=0.25)
         
-        scatter = ax.scatter(X_np, y_np, c='#1E88E5', alpha=0.6, label='Data')
+        scatter = ax.scatter(X_np, y_np, c='#1E88E5', alpha=0.6, label='Datos')
         predictions_sorted = [np.array(pred)[sort_idx] for pred in predictions_history]
-        line, = ax.plot(X_np, predictions_sorted[0], color='#D81B60', lw=2, label='Prediction')
+        line, = ax.plot(X_np, predictions_sorted[0], color='#D81B60', lw=2, label='Predicción')
         
         ax.set_xlabel('X', fontsize=12)
         ax.set_ylabel('Y', fontsize=12)
@@ -99,9 +99,9 @@ class TestRegressionVisualization(unittest.TestCase):
         ax.legend(fontsize=10)
         ax.grid(True)
         
-        # Add slider
+        # Agregar deslizador
         slider_ax = plt.axes([0.2, 0.1, 0.6, 0.03], facecolor='#d3d3d3')
-        slider = Slider(slider_ax, 'Epoch', 0, len(self.epochs_to_store) - 1,
+        slider = Slider(slider_ax, 'Época', 0, len(self.epochs_to_store) - 1,
                        valinit=0, valstep=1, color='#FFC107')
         
         def update(val):
@@ -111,29 +111,29 @@ class TestRegressionVisualization(unittest.TestCase):
         
         slider.on_changed(update)
         
-        # Add epoch text
+        # Agregar texto de época
         epoch_text = ax.text(0.02, 0.95, '', transform=ax.transAxes, 
                            fontsize=12, fontweight='bold')
         
         def update_epoch_text(val):
             epoch_index = int(slider.val)
-            epoch_text.set_text(f'Epoch: {self.epochs_to_store[epoch_index]}')
+            epoch_text.set_text(f'Época: {self.epochs_to_store[epoch_index]}')
         
         slider.on_changed(update_epoch_text)
-        update_epoch_text(0)  # Initialize text
+        update_epoch_text(0)  # Inicializar texto
         
         plt.show()
         
-        # Print final parameters
-        print("\nFinal Parameters:")
-        print("Weights:", model.weights.data)
-        print("Bias:", model.bias.data)
+        # Imprimir parámetros finales
+        print("\nParámetros Finales:")
+        print("Pesos:", model.weights.data)
+        print("Sesgo:", model.bias.data)
         
         return predictions_history, losses[-1]
 
     def test_linear_regression(self):
-        """Test linear regression with visualization"""
-        print("\nTesting Linear Regression...")
+        """Probar regresión lineal con visualización"""
+        print("\nProbando Regresión Lineal...")
         X, y = self.generate_linear_data()
         
         model = LinearRegression(
@@ -145,17 +145,17 @@ class TestRegressionVisualization(unittest.TestCase):
 
         print(model)
         predictions, final_loss = self.train_and_visualize(
-            model, X, y, 'Linear Regression: Data vs Predictions'
+            model, X, y, 'Regresión Lineal: Datos vs Predicciones'
         )
         
-        # Basic assertions
+        # Aserciones básicas
         self.assertIsNotNone(predictions)
         self.assertGreater(len(predictions), 0)
-        self.assertLess(final_loss, 1.0)  # Assuming convergence
+        self.assertLess(final_loss, 1.0)  # Asumiendo convergencia
 
     def test_polynomial_regression(self):
-        """Test polynomial regression with visualization"""
-        print("\nTesting Polynomial Regression...")
+        """Probar regresión polinomial con visualización"""
+        print("\nProbando Regresión Polinomial...")
         X, y = self.generate_nonlinear_data()
         
         model = PolynomialRegression(
@@ -168,13 +168,13 @@ class TestRegressionVisualization(unittest.TestCase):
 
         print(model)
         predictions, final_loss = self.train_and_visualize(
-            model, X, y, 'Polynomial Regression: Data vs Predictions'
+            model, X, y, 'Regresión Polinomial: Datos vs Predicciones'
         )
         
-        # Basic assertions
+        # Aserciones básicas
         self.assertIsNotNone(predictions)
         self.assertGreater(len(predictions), 0)
-        self.assertLess(final_loss, 1.0)  # Assuming convergence
+        self.assertLess(final_loss, 1.0)  # Asumiendo convergencia
 
 if __name__ == '__main__':
     unittest.main()

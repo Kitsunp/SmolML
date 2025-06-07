@@ -1,136 +1,135 @@
-# SmolML - Tree Models: Decisions, Decisions!
+# SmolML - Modelos de Árboles: ¡Decisiones, Decisiones!
 
-Welcome to the *branch* of SmolML dealing with **Tree-Based Models**! Unlike the models we saw in **Regression** (which rely on smooth equations and gradient descent), Decision Trees and their powerful sibling, Random Forests, make predictions by learning a series of explicit **decision rules** from the data. Think of it like building a sophisticated flowchart to classify an email as spam or not spam, or to predict a house price.
+Bienvenido a la *rama* de SmolML que trata con **Modelos Basados en Árboles (Tree-Based Models)**! A diferencia de los modelos que vimos en **Regresión** (que dependen de ecuaciones suaves y descenso de gradiente), los Árboles de Decisión (Decision Trees) y su poderoso hermano, los Bosques Aleatorios (Random Forests), hacen predicciones aprendiendo una serie de **reglas de decisión (decision rules)** explícitas de los datos. Piensa en ello como construir un diagrama de flujo sofisticado para clasificar un email como spam o no spam, o para predecir el precio de una casa.
 
-These models are incredibly versatile, handling both **classification** (predicting categories) and **regression** (predicting numerical values) tasks. They don't need feature scaling and can capture complex, non-linear relationships. Let's dive into how they work!
+Estos modelos son increíblemente versátiles, manejando tanto problemas de **clasificación (classification)** (prediciendo categorías) como de **regresión (regression)** (prediciendo valores numéricos). No necesitan escalado de características y pueden capturar relaciones complejas y no lineales. ¡Vamos a profundizar en cómo funcionan!
 
-## Decision Trees: The Flowchart Approach
+## Árboles de Decisión: El Enfoque de Diagrama de Flujo
 
-Imagine you're trying to decide if you should play tennis today. You might ask:
-1.  Is the outlook sunny?
-    * Yes -> Is the humidity high?
-        * Yes -> Don't Play
-        * No -> Play!
-    * No -> Is it raining?
-        * Yes -> Don't Play
-        * No -> Play!
+Imagina que estás tratando de decidir si deberías jugar tenis hoy. Podrías preguntar:
+1.  ¿Es soleado el pronóstico?
+    * Sí -> ¿Es alta la humedad?
+        * Sí -> No Jugar
+        * No -> ¡Jugar!
+    * No -> ¿Está lloviendo?
+        * Sí -> No Jugar
+        * No -> ¡Jugar!
 
-That's the essence of a **Decision Tree**! It's a structure that recursively splits the data based on simple questions about the input features.
+¡Esa es la esencia de un **Árbol de Decisión (Decision Tree)**! Es una estructura que divide recursivamente los datos basándose en preguntas simples sobre las características de entrada.
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/0b805169-fa57-4097-80e0-e841ea3246af" width="600">
 </div>
 
-**How it's Built (The `fit` method):**
+**Cómo se Construye (El método `fit`):**
 
-The magic happens in the `fit` method of the `DecisionTree` class (see `decision_tree.py`). It builds the tree structure, represented by interconnected `DecisionNode` objects, using a process called **recursive partitioning**:
+La magia sucede en el método `fit` de la clase `DecisionTree` (ver `decision_tree.py`). Construye la estructura del árbol, representada por objetos `DecisionNode` interconectados, usando un proceso llamado **particionamiento recursivo (recursive partitioning)**:
 
-1.  **Start with all data:** Begin at the root node with your entire training dataset.
-2.  **Find the Best Question:** The core task is to find the *best* feature and *best* threshold value to split the current data into two groups (left and right branches). What's "best"? A split that makes the resulting groups as "pure" or homogeneous as possible regarding the target variable (e.g., all samples in a group belong to the same class, or have very similar numerical values).
-    * **How? The `_find_best_split` and `_calculate_gain` methods:** The tree tries *every possible split* (each feature, each unique value as a threshold) and evaluates how much "purer" the resulting groups are compared to the parent group.
-        * **For Classification:** It typically uses **Entropy** (a measure of disorder) and calculates the **Information Gain** (how much the entropy decreases after the split). A higher gain means a better split. (See `_information_gain`).
-        * **For Regression:** It typically uses **Variance** or **Mean Squared Error (MSE)** and calculates how much this metric is reduced by the split. A larger reduction means a better split. (See `_mse_reduction`).
-3.  **Split the Data:** Apply the best split found, dividing the data into two subsets.
-4.  **Repeat Recursively:** Treat each subset as a new problem and repeat steps 2 and 3 for the left and right branches, creating child nodes (`_grow_tree` method calls itself).
-5.  **Stop Splitting (Create a Leaf Node):** The recursion stops, and a **leaf node** (a `DecisionNode` with a `value` but no children) is created when certain conditions are met:
-    * The node is perfectly "pure" (all samples belong to the same class/have very similar values - check `_is_pure`).
-    * A predefined `max_depth` is reached.
-    * The number of samples in a node falls below `min_samples_split`.
-    * A potential split would result in a child node having fewer than `min_samples_leaf` samples.
-    * No further split improves purity.
-    These stopping criteria (hyperparameters set during `__init__`) are crucial to prevent the tree from growing too complex and **overfitting** (memorizing the training data instead of learning general patterns).
+1.  **Empezar con todos los datos:** Comenzar en el nodo raíz con todo tu conjunto de datos de entrenamiento.
+2.  **Encontrar la Mejor Pregunta:** La tarea central es encontrar la *mejor* característica y el *mejor* valor umbral para dividir los datos actuales en dos grupos (ramas izquierda y derecha). ¿Qué es "mejor"? Una división que hace que los grupos resultantes sean lo más "puros" u homogéneos posible respecto a la variable objetivo (ej., todas las muestras en un grupo pertenecen a la misma clase, o tienen valores numéricos muy similares).
+    * **¿Cómo? Los métodos `_find_best_split` y `_calculate_gain`:** El árbol prueba *cada división posible* (cada característica, cada valor único como umbral) y evalúa qué tan "más puros" son los grupos resultantes comparados con el grupo padre.
+        * **Para Clasificación:** Típicamente usa **Entropía (Entropy)** (una medida de desorden) y calcula la **Ganancia de Información (Information Gain)** (cuánto decrece la entropía después de la división). Una ganancia mayor significa una mejor división. (Ver `_information_gain`).
+        * **Para Regresión:** Típicamente usa **Varianza (Variance)** o **Error Cuadrático Medio (MSE)** y calcula cuánto se reduce esta métrica por la división. Una reducción mayor significa una mejor división. (Ver `_mse_reduction`).
+3.  **Dividir los Datos:** Aplicar la mejor división encontrada, dividiendo los datos en dos subconjuntos.
+4.  **Repetir Recursivamente:** Tratar cada subconjunto como un nuevo problema y repetir los pasos 2 y 3 para las ramas izquierda y derecha, creando nodos hijos (el método `_grow_tree` se llama a sí mismo).
+5.  **Parar de Dividir (Crear un Nodo Hoja):** La recursión se detiene, y se crea un **nodo hoja (leaf node)** (un `DecisionNode` con un `value` pero sin hijos) cuando se cumplen ciertas condiciones:
+    * El nodo es perfectamente "puro" (todas las muestras pertenecen a la misma clase/tienen valores muy similares - verificar `_is_pure`).
+    * Se alcanza una `max_depth` predefinida.
+    * El número de muestras en un nodo cae por debajo de `min_samples_split`.
+    * Una división potencial resultaría en un nodo hijo teniendo menos de `min_samples_leaf` muestras.
+    * Ninguna división adicional mejora la pureza.
+    Estos criterios de parada (hiperparámetros establecidos durante `__init__`) son cruciales para prevenir que el árbol crezca demasiado complejo y sufra **sobreajuste (overfitting)** (memorizar los datos de entrenamiento en lugar de aprender patrones generales).
 
-**Making Predictions (The `predict` method):**
+**Haciendo Predicciones (El método `predict`):**
 
-Once the tree is built, predicting is straightforward! For a new data point:
-1.  Start at the `root` node.
-2.  Check the decision rule (feature and threshold) at the current node.
-3.  Follow the corresponding branch (left if `feature_value <= threshold`, right otherwise).
-4.  Repeat steps 2 and 3 until you reach a leaf node (`_traverse_tree` method).
-5.  The prediction is the value stored in that leaf node (`node.value`). This value is determined during training (`_leaf_value`):
-    * Classification: The most common class among the training samples that ended up in this leaf.
-    * Regression: The average value of the training samples that ended up in this leaf.
+¡Una vez que el árbol está construido, predecir es directo! Para un nuevo punto de datos:
+1.  Empezar en el nodo `root`.
+2.  Verificar la regla de decisión (característica y umbral) en el nodo actual.
+3.  Seguir la rama correspondiente (izquierda si `valor_característica <= umbral`, derecha de otro modo).
+4.  Repetir pasos 2 y 3 hasta llegar a un nodo hoja (método `_traverse_tree`).
+5.  La predicción es el valor almacenado en ese nodo hoja (`node.value`). Este valor se determina durante el entrenamiento (`_leaf_value`):
+    * Clasificación: La clase más común entre las muestras de entrenamiento que terminaron en esta hoja.
+    * Regresión: El valor promedio de las muestras de entrenamiento que terminaron en esta hoja.
 
-Cool, right? A single tree is intuitive, but sometimes they can be a bit unstable and prone to overfitting. What if we could combine *many* trees?
+¡Genial, verdad? Un solo árbol es intuitivo, pero a veces pueden ser un poco inestables y propensos al sobreajuste. ¿Qué tal si pudiéramos combinar *muchos* árboles?
 
-## Random Forests: The Wisdom of Many Trees
-
+## Bosques Aleatorios: La Sabiduría de Muchos Árboles
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/6a652774-4fc3-4ed1-89d4-e9eaf1410e2a" width="600">
 </div>
 
-A single Decision Tree can be sensitive to the specific data it's trained on. A slightly different dataset might produce a very different tree structure. **Random Forests** tackle this by building an *ensemble* (a "forest") of many Decision Trees and combining their predictions. It's like asking many different experts (trees) and going with the consensus!
+Un solo Árbol de Decisión puede ser sensible a los datos específicos en los que se entrena. Un conjunto de datos ligeramente diferente podría producir una estructura de árbol muy diferente. Los **Bosques Aleatorios (Random Forests)** abordan esto construyendo un *ensamble (ensemble)* (un "bosque") de muchos Árboles de Decisión y combinando sus predicciones. ¡Es como preguntar a muchos expertos diferentes (árboles) y seguir el consenso!
 
-**The "Random" Secrets (`RandomForest` class in `random_forest.py`):**
+**Los Secretos "Aleatorios" (clase `RandomForest` en `random_forest.py`):**
 
-Random Forests introduce clever randomness during the training (`fit` method) of individual trees to make them diverse:
+Los Bosques Aleatorios introducen aleatoriedad inteligente durante el entrenamiento (`fit`) de árboles individuales para hacerlos diversos:
 
-1.  **Bagging (Bootstrap Aggregating):** Each tree in the forest is trained on a slightly different dataset. This is done by **bootstrapping**: creating a random sample of the original training data *with replacement*. This means some data points might appear multiple times in a tree's training set, while others might be left out entirely. (Controlled by the `bootstrap` parameter and implemented in `_bootstrap_sample`). Why? It ensures each tree sees a slightly different perspective of the data.
-2.  **Random Feature Subsets:** When finding the best split at each node within *each* tree, the algorithm doesn't consider *all* features. Instead, it only evaluates a **random subset** of the features (`max_features` parameter). (See `_get_max_features` and the modified `_find_best_split` logic injected during `RandomForest.fit`). Why? This prevents a few very strong features from dominating *all* the trees, forcing other features to be considered and leading to more diverse tree structures.
+1.  **Bagging (Bootstrap Aggregating):** Cada árbol en el bosque se entrena en un conjunto de datos ligeramente diferente. Esto se hace mediante **bootstrapping**: crear una muestra aleatoria de los datos de entrenamiento originales *con reemplazo*. Esto significa que algunos puntos de datos podrían aparecer múltiples veces en el conjunto de entrenamiento de un árbol, mientras otros podrían quedar completamente fuera. (Controlado por el parámetro `bootstrap` e implementado en `_bootstrap_sample`). ¿Por qué? Asegura que cada árbol vea una perspectiva ligeramente diferente de los datos.
+2.  **Subconjuntos Aleatorios de Características:** Al encontrar la mejor división en cada nodo dentro de *cada* árbol, el algoritmo no considera *todas* las características. En su lugar, solo evalúa un **subconjunto aleatorio** de las características (parámetro `max_features`). (Ver `_get_max_features` y la lógica `_find_best_split` modificada inyectada durante `RandomForest.fit`). ¿Por qué? Esto previene que unas pocas características muy fuertes dominen *todos* los árboles, forzando a otras características a ser consideradas y llevando a estructuras de árbol más diversas.
 
-**Building the Forest (`fit`):**
+**Construyendo el Bosque (`fit`):**
 
-The `RandomForest.fit` method essentially does this:
-* Loop `n_trees` times:
-    * Create a bootstrap sample of the data (if `bootstrap=True`).
-    * Instantiate a `DecisionTree`.
-    * Inject the "random feature subset" logic into the tree's splitting mechanism.
-    * Train the `DecisionTree` on the sampled data with the modified splitting.
-    * Store the trained tree in `self.trees`.
+El método `RandomForest.fit` esencialmente hace esto:
+* Hacer un bucle `n_trees` veces:
+    * Crear una muestra bootstrap de los datos (si `bootstrap=True`).
+    * Instanciar un `DecisionTree`.
+    * Inyectar la lógica de "subconjunto aleatorio de características" en el mecanismo de división del árbol.
+    * Entrenar el `DecisionTree` en los datos muestreados con la división modificada.
+    * Almacenar el árbol entrenado en `self.trees`.
 
-**Making Predictions (`predict`):**
+**Haciendo Predicciones (`predict`):**
 
-To make a prediction for a new data point, the Random Forest asks *every tree* in its ensemble (`self.trees`) to make a prediction. Then, it combines them:
-* **Classification:** It takes a **majority vote**. The class predicted by the most trees wins.
-* **Regression:** It calculates the **average** of all the predictions from the individual trees.
+Para hacer una predicción para un nuevo punto de datos, el Bosque Aleatorio le pide a *cada árbol* en su ensamble (`self.trees`) que haga una predicción. Luego, las combina:
+* **Clasificación:** Toma un **voto mayoritario**. La clase predicha por la mayoría de árboles gana.
+* **Regresión:** Calcula el **promedio** de todas las predicciones de los árboles individuales.
 
-This aggregation process typically leads to models that are much more robust, less prone to overfitting, and generalize better to new, unseen data compared to a single Decision Tree.
+Este proceso de agregación típicamente lleva a modelos que son mucho más robustos, menos propensos al sobreajuste, y generalizan mejor a datos nuevos no vistos comparado con un solo Árbol de Decisión.
 
-## Example Usage
+## Ejemplo de Uso
 
-Let's see how you might use a `RandomForestClassifier` (assuming classification task):
+Veamos cómo podrías usar un `RandomForest` (asumiendo tarea de clasificación):
 
 ```python
 from smolml.models.tree import RandomForest, DecisionTree
 from smolml.core.ml_array import MLArray
 
-# Sample Data (e.g., 4 features, 5 samples for classification)
+# Datos de Muestra (ej., 4 características, 5 muestras para clasificación)
 X_data = [[5.1, 3.5, 1.4, 0.2],
           [4.9, 3.0, 1.4, 0.2],
           [6.7, 3.1, 4.4, 1.4],
           [6.0, 2.9, 4.5, 1.5],
           [5.8, 2.7, 5.1, 1.9]]
-# Target classes (e.g., 0, 1, 2)
+# Clases objetivo (ej., 0, 1, 2)
 y_data = [0, 0, 1, 1, 2]
 
-# Convert to MLArray (though the fit/predict methods handle conversion)
+# Convertir a MLArray (aunque los métodos fit/predict manejan la conversión)
 X = MLArray(X_data)
 y = MLArray(y_data)
 
-# --- Using a Decision Tree ---
-print("--- Training Decision Tree ---")
+# --- Usando un Árbol de Decisión ---
+print("--- Entrenando Árbol de Decisión ---")
 dt = DecisionTree(max_depth=3, task="classification")
 dt.fit(X, y)
-print(dt) # Shows structure and stats
+print(dt) # Muestra estructura y estadísticas
 dt_pred = dt.predict(X)
-print(f"DT Predictions on training data: {dt_pred.to_list()}")
+print(f"Predicciones DT en datos de entrenamiento: {dt_pred.to_list()}")
 
-# --- Using a Random Forest ---
-print("\n--- Training Random Forest ---")
-# Build a forest of 10 trees
+# --- Usando un Bosque Aleatorio ---
+print("\n--- Entrenando Bosque Aleatorio ---")
+# Construir un bosque de 10 árboles
 rf = RandomForest(n_trees=10, max_depth=3, task="classification")
 rf.fit(X, y)
-print(rf) # Shows forest stats
+print(rf) # Muestra estadísticas del bosque
 rf_pred = rf.predict(X)
-print(f"RF Predictions on training data: {rf_pred.to_list()}")
+print(f"Predicciones RF en datos de entrenamiento: {rf_pred.to_list()}")
 
-# Predict on new data
+# Predecir en nuevos datos
 X_new = MLArray([[6.0, 3.0, 4.8, 1.8], [5.0, 3.4, 1.6, 0.4]])
 rf_new_pred = rf.predict(X_new)
-print(f"\nRF Predictions on new data {X_new.to_list()}: {rf_new_pred.to_list()}")
+print(f"\nPredicciones RF en datos nuevos {X_new.to_list()}: {rf_new_pred.to_list()}")
 ```
 
-## From roots to leaves, from data to predictions
+## De raíces a hojas, de datos a predicciones
 
-Decision Trees offer an interpretable, flowchart-like way to model data, while Random Forests leverage the power of ensemble learning (combining many diverse trees) to create highly accurate and robust models for both classification and regression. They represent a different paradigm from gradient-based optimization, but are a cornerstone of practical machine learning!
+Los Árboles de Decisión ofrecen una manera interpretable, similar a diagramas de flujo, para modelar datos, mientras que los Bosques Aleatorios aprovechan el poder del aprendizaje en ensamble (combinando muchos árboles diversos) para crear modelos altamente precisos y robustos tanto para clasificación como regresión. ¡Representan un paradigma diferente de la optimización basada en gradientes, pero son una piedra angular del machine learning práctico!

@@ -7,18 +7,18 @@ import smolml.utils.optimizers as optimizers
 
 """
 //////////////////////
-/// NEURAL NETWORK ///
+/// RED NEURONAL ///
 //////////////////////
 """
 
 class NeuralNetwork:
     """
-    Implementation of a feedforward neural network with customizable layers and loss function.
-    Supports training through backpropagation and gradient descent.
+    Implementación de una red neuronal feedforward con capas y función de pérdida personalizables.
+    Soporta entrenamiento a través de retropropagación y descenso de gradiente.
     """
     def __init__(self, layers: list, loss_function: callable, optimizer: optimizers.Optimizer = optimizers.SGD()) -> None:
         """
-        Initializes the network with a list of layers and a loss function for training.
+        Inicializa la red con una lista de capas y una función de pérdida para entrenamiento.
         """
         self.layers = layers
         self.loss_function = loss_function
@@ -26,37 +26,37 @@ class NeuralNetwork:
 
     def forward(self, input_data):
         """
-        Performs forward pass by sequentially applying each layer's transformation.
+        Realiza paso hacia adelante aplicando secuencialmente la transformación de cada capa.
         """
         if not isinstance(input_data, MLArray):
-            raise TypeError(f"Input data must be MLArray, not {type(input_data)}")
+            raise TypeError(f"Los datos de entrada deben ser MLArray, no {type(input_data)}")
         for layer in self.layers:
             input_data = layer.forward(input_data)
         return input_data
 
     def train(self, X, y, epochs, verbose=True, print_every=1):
         """
-        Trains the network using gradient descent for the specified number of epochs.
-        Prints loss every 100 epochs to monitor training progress.
+        Entrena la red usando descenso de gradiente por el número especificado de épocas.
+        Imprime pérdida cada 100 épocas para monitorear progreso del entrenamiento.
         """
         X, y = MLArray.ensure_array(X, y)
         losses = []
         for epoch in range(epochs):
-            # Forward pass through the network
+            # Paso hacia adelante a través de la red
             y_pred = self.forward(X)
             
-            # Compute loss between predictions and targets
+            # Calcular pérdida entre predicciones y objetivos
             loss = self.loss_function(y_pred, y)
             losses.append(loss.data.data)
             
-            # Backward pass to compute gradients
+            # Paso hacia atrás para calcular gradientes
             loss.backward()
             
-            # Update parameters in each layer
+            # Actualizar parámetros en cada capa
             for idx, layer in enumerate(self.layers):
                 layer.update(self.optimizer, idx)
             
-            # Reset gradients for next iteration
+            # Reiniciar gradientes para la siguiente iteración
             X.restart()
             y.restart()
             for layer in self.layers:
@@ -64,32 +64,32 @@ class NeuralNetwork:
                 layer.biases.restart()
                 
             if verbose:
-                # Print training progress
+                # Imprimir progreso del entrenamiento
                 if (epoch+1) % print_every == 0:
-                    print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.data}")
+                    print(f"Época {epoch + 1}/{epochs}, Pérdida: {loss.data}")
 
         return losses
         
     def __repr__(self):
         """
-        Returns a string representation of the neural network architecture.
-        Displays layer information, loss function, optimizer details, and detailed memory usage.
+        Retorna una representación en cadena de la arquitectura de red neuronal.
+        Muestra información de capas, función de pérdida, detalles del optimizador y uso detallado de memoria.
         """
-        # Get terminal width for formatting
+        # Obtener ancho de terminal para formateo
         try:
             import os
             terminal_width = os.get_terminal_size().columns
         except Exception:
             terminal_width = 80
 
-        # Create header
-        header = "Neural Network Architecture"
+        # Crear encabezado
+        header = "Arquitectura de Red Neuronal"
         separator = "=" * terminal_width
         
-        # Get size information
+        # Obtener información de tamaño
         size_info = memory.calculate_neural_network_size(self)
         
-        # Format layers information
+        # Formatear información de capas
         layers_info = []
         for i, (layer, layer_size) in enumerate(zip(self.layers, size_info['layers'])):
             if isinstance(layer, DenseLayer):
@@ -97,41 +97,41 @@ class NeuralNetwork:
                 output_size = layer.weights.shape[1]
                 activation_name = layer.activation_function.__name__
                 layer_info = [
-                    f"Layer {i+1}: Dense("
-                    f"in={input_size}, "
-                    f"out={output_size}, "
-                    f"activation={activation_name})"
+                    f"Capa {i+1}: Densa("
+                    f"entrada={input_size}, "
+                    f"salida={output_size}, "
+                    f"activación={activation_name})"
                 ]
                 
-                # Parameters info
-                params = input_size * output_size + output_size  # weights + biases
+                # Información de parámetros
+                params = input_size * output_size + output_size  # pesos + sesgos
                 layer_info.append(
-                    f"    Parameters: {params:,} "
-                    f"({input_size}×{output_size} weights + {output_size} biases)"
+                    f"    Parámetros: {params:,} "
+                    f"({input_size}×{output_size} pesos + {output_size} sesgos)"
                 )
                 
-                # Memory info
+                # Información de memoria
                 layer_info.append(
-                    f"    Memory: {memory.format_size(layer_size['total'])} "
-                    f"(weights: {memory.format_size(layer_size['weights_size'])}, "
-                    f"biases: {memory.format_size(layer_size['biases_size'])})"
+                    f"    Memoria: {memory.format_size(layer_size['total'])} "
+                    f"(pesos: {memory.format_size(layer_size['weights_size'])}, "
+                    f"sesgos: {memory.format_size(layer_size['biases_size'])})"
                 )
                 
                 layers_info.append("\n".join(layer_info))
 
-        # Calculate total parameters
+        # Calcular parámetros totales
         total_params = sum(
             layer.weights.size() + layer.biases.size()
             for layer in self.layers
         )
 
-        # Format optimizer information
+        # Formatear información del optimizador
         optimizer_info = [
-            f"Optimizer: {self.optimizer.__class__.__name__}("
+            f"Optimizador: {self.optimizer.__class__.__name__}("
             f"learning_rate={self.optimizer.learning_rate})"
         ]
         
-        # Add optimizer state information if it exists
+        # Agregar información de estado del optimizador si existe
         if size_info['optimizer']['state']:
             state_sizes = [
                 f"    {key}: {memory.format_size(value)}"
@@ -139,59 +139,59 @@ class NeuralNetwork:
             ]
             optimizer_info.extend(state_sizes)
         
-        # Format loss function information
-        loss_info = f"Loss Function: {self.loss_function.__name__}"
+        # Formatear información de función de pérdida
+        loss_info = f"Función de Pérdida: {self.loss_function.__name__}"
 
-        # Detailed memory breakdown
-        memory_info = ["Memory Usage:"]
+        # Desglose detallado de memoria
+        memory_info = ["Uso de Memoria:"]
         
-        # Layer memory
+        # Memoria de capas
         for i, layer_size in enumerate(size_info['layers']):
             memory_info.append(
-                f"  Layer {i+1}: {memory.format_size(layer_size['total'])} "
-                f"(weights: {memory.format_size(layer_size['weights_size'])}, "
-                f"biases: {memory.format_size(layer_size['biases_size'])})"
+                f"  Capa {i+1}: {memory.format_size(layer_size['total'])} "
+                f"(pesos: {memory.format_size(layer_size['weights_size'])}, "
+                f"sesgos: {memory.format_size(layer_size['biases_size'])})"
             )
         
-        # Optimizer memory
+        # Memoria del optimizador
         if size_info['optimizer']['state']:
             opt_size = sum(size_info['optimizer']['state'].values())
-            memory_info.append(f"  Optimizer State: {memory.format_size(opt_size)}")
+            memory_info.append(f"  Estado del Optimizador: {memory.format_size(opt_size)}")
         
-        memory_info.append(f"  Base Objects: {memory.format_size(size_info['optimizer']['size'])}")
-        memory_info.append(f"Total Memory: {memory.format_size(size_info['total'])}")
+        memory_info.append(f"  Objetos Base: {memory.format_size(size_info['optimizer']['size'])}")
+        memory_info.append(f"Memoria Total: {memory.format_size(size_info['total'])}")
 
-        # Combine all parts
+        # Combinar todas las partes
         return (
             f"\n{header}\n{separator}\n\n"
-            f"Architecture:\n"
+            f"Arquitectura:\n"
             + "\n".join(f"  {layer}" for layer in layers_info)
             + f"\n\n"
             + "\n".join(optimizer_info)
             + f"\n{loss_info}\n\n"
-            f"Total Parameters: {total_params:,}\n\n"
+            f"Parámetros Totales: {total_params:,}\n\n"
             + "\n".join(memory_info)
             + f"\n{separator}\n"
         )
 
 def example_neural_network():
-    # Example usage
+    # Ejemplo de uso
     input_size = 2
     hidden_size = 32
     output_size = 1
 
-    # Create the neural network
+    # Crear la red neuronal
     nn = NeuralNetwork([
         DenseLayer(input_size, hidden_size, activation.relu),
         DenseLayer(hidden_size, output_size, activation.tanh)
     ], losses.mse_loss, optimizers.AdaGrad(learning_rate=0.1))
 
-    # Generate some dummy data
+    # Generar algunos datos dummy
     X = [[0, 0], [0, 1], [1, 0], [1, 1]]
     y = [[0], [1], [1], [0]]
 
     print(nn)
-    # Train the network
+    # Entrenar la red
     nn.train(X, y, epochs=100)
 
     y_pred = nn.forward(MLArray(X))

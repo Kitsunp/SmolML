@@ -6,28 +6,28 @@ from operator import mul
 
 """
 ////////////////////
-/// INITIALIZERS ///
+/// INICIALIZADORES ///
 ////////////////////
 """
 
 class WeightInitializer:
    """
-   Base class for neural network weight initialization strategies.
-   Provides common utilities for creating weight arrays.
+   Clase base para estrategias de inicialización de pesos de redes neuronales.
+   Proporciona utilidades comunes para crear arrays de pesos.
    """
    @staticmethod
    def initialize(*dims):
        """
-       Abstract method for initializing weights.
-       Must be implemented by concrete initializer classes.
+       Método abstracto para inicializar pesos.
+       Debe ser implementado por clases inicializadoras concretas.
        """
-       raise NotImplementedError("Subclasses must implement this method")
+       raise NotImplementedError("Las subclases deben implementar este método")
 
    @staticmethod
    def _create_array(generator, dims):
        """
-       Creates an MLArray with given dimensions using a generator function.
-       Flattens dimensions and reshapes array to desired shape.
+       Crea un MLArray con dimensiones dadas usando una función generadora.
+       Aplana dimensiones y redimensiona array a forma deseada.
        """
        total_elements = reduce(mul, dims)
        flat_array = [generator() for _ in range(total_elements)]
@@ -35,14 +35,14 @@ class WeightInitializer:
 
 class XavierUniform(WeightInitializer):
    """
-   Xavier/Glorot uniform initialization.
-   Generates weights from uniform distribution with variance based on layer dimensions.
+   Inicialización uniforme Xavier/Glorot.
+   Genera pesos desde distribución uniforme con varianza basada en dimensiones de capa.
    """
    @staticmethod
    def initialize(*dims):
        """
-       Initializes weights using uniform distribution scaled by input/output dimensions.
-       Good for layers with tanh or sigmoid activation.
+       Inicializa pesos usando distribución uniforme escalada por dimensiones de entrada/salida.
+       Buena para capas con activación tanh o sigmoid.
        """
        dims = XavierUniform._process_dims(dims)
        fan_in = dims[0] if len(dims) > 0 else 1
@@ -53,7 +53,7 @@ class XavierUniform(WeightInitializer):
    @staticmethod
    def _process_dims(dims):
        """
-       Processes input dimensions to handle both tuple/list and separate arguments.
+       Procesa dimensiones de entrada para manejar tanto tuplas/listas como argumentos separados.
        """
        if len(dims) == 1 and isinstance(dims[0], (tuple, list)):
            return dims[0]
@@ -61,14 +61,14 @@ class XavierUniform(WeightInitializer):
 
 class XavierNormal(WeightInitializer):
    """
-   Xavier/Glorot normal initialization.
-   Generates weights from normal distribution with variance based on layer dimensions.
+   Inicialización normal Xavier/Glorot.
+   Genera pesos desde distribución normal con varianza basada en dimensiones de capa.
    """
    @staticmethod
    def initialize(*dims):
        """
-       Initializes weights using normal distribution scaled by input/output dimensions.
-       Good for layers with tanh or sigmoid activation.
+       Inicializa pesos usando distribución normal escalada por dimensiones de entrada/salida.
+       Buena para capas con activación tanh o sigmoid.
        """
        dims = XavierNormal._process_dims(dims)
        fan_in = dims[0] if len(dims) > 0 else 1
@@ -79,7 +79,7 @@ class XavierNormal(WeightInitializer):
    @staticmethod
    def _process_dims(dims):
        """
-       Processes input dimensions to handle both tuple/list and separate arguments.
+       Procesa dimensiones de entrada para manejar tanto tuplas/listas como argumentos separados.
        """
        if len(dims) == 1 and isinstance(dims[0], (tuple, list)):
            return dims[0]
@@ -87,14 +87,14 @@ class XavierNormal(WeightInitializer):
 
 class HeInitialization(WeightInitializer):
    """
-   He/Kaiming initialization.
-   Generates weights from normal distribution with variance based on input dimension.
+   Inicialización He/Kaiming.
+   Genera pesos desde distribución normal con varianza basada en dimensión de entrada.
    """
    @staticmethod
    def initialize(*dims):
        """
-       Initializes weights using normal distribution scaled by input dimension.
-       Optimal for layers with ReLU activation.
+       Inicializa pesos usando distribución normal escalada por dimensión de entrada.
+       Óptima para capas con activación ReLU.
        """
        dims = HeInitialization._process_dims(dims)
        fan_in = dims[0] if len(dims) > 0 else 1
@@ -104,7 +104,7 @@ class HeInitialization(WeightInitializer):
    @staticmethod
    def _process_dims(dims):
        """
-       Processes input dimensions to handle both tuple/list and separate arguments.
+       Procesa dimensiones de entrada para manejar tanto tuplas/listas como argumentos separados.
        """
        if len(dims) == 1 and isinstance(dims[0], (tuple, list)):
            return dims[0]

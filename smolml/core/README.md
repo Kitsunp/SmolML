@@ -1,166 +1,166 @@
-# SmolML - Core: Automatic Differentiation & N-Dimensional Arrays
+# SmolML - Core: Diferenciación Automática y Arrays N-Dimensionales
 
-Welcome to the core of SmolML! This is where the magic begins if you want to understand how machine learning models, especially neural networks, learn from data. We'll break down two fundamental concepts: how computers *calculate* the direction for learning (automatic differentiation) and how we handle the multi-dimensional data involved.
+Bienvenido al núcleo de SmolML! Aquí es donde comienza la magia si quieres entender cómo los modelos de machine learning, especialmente las redes neuronales, aprenden de los datos. Vamos a desglosar dos conceptos fundamentales: cómo las computadoras *calculan* la dirección para el aprendizaje (diferenciación automática) y cómo manejamos los datos multi-dimensionales involucrados.
 
-This part of SmolML focuses on handling this data and calculating gradients automatically. Why gradients? Why automatic? Let's dive in.
+Esta parte de SmolML se enfoca en manejar estos datos y calcular gradientes automáticamente. ¿Por qué gradientes? ¿Por qué automático? Vamos a profundizar.
 
-## Why Do We Need Gradients Anyway?
+## ¿Por qué Necesitamos Gradientes de Todos Modos?
 
-Think about teaching a computer to recognize a cat in a photo. The computer makes a prediction based on its current internal settings (parameters or weights). Initially, these settings are random, so the prediction is likely wrong. We measure *how wrong* using a "loss function" (we have those in `smolml\utils\losses.py`, explained in another section) – a lower loss means a better prediction.
+Piensa en enseñar a una computadora a reconocer un gato en una foto. La computadora hace una predicción basándose en su configuración interna actual (parámetros o pesos). Inicialmente, estas configuraciones son aleatorias, así que la predicción probablemente esté mal. Medimos *qué tan mal* usando una "función de pérdida" (las tenemos en `smolml\utils\losses.py`, explicadas en otra sección) – una pérdida menor significa una mejor predicción.
 
-The goal is to adjust the computer's parameters to *minimize* this loss. But how do we know *which way* to adjust each parameter? Should we increase it? Decrease it? By how much?
+El objetivo es ajustar los parámetros de la computadora para *minimizar* esta pérdida. Pero ¿cómo sabemos *hacia qué dirección* ajustar cada parámetro? ¿Deberíamos aumentarlo? ¿Disminuirlo? ¿En qué cantidad?
 
 ![Figure-3-37-Gradient-descent-Algorithm-illustration(1)](https://github.com/user-attachments/assets/93e2df5b-5f02-43d1-a4b9-3e9daeb81a9a)
 
-This is where **gradients** come in. The gradient of the loss function with respect to a specific parameter tells us the "slope" of the loss at that parameter's current value. It points in the direction of the *steepest increase* in the loss. So, if we want to *decrease* the loss, we nudge the parameter in the *opposite* direction of the gradient (the purple arrow in the above image). The size of the gradient also tells us how sensitive the loss is to that parameter – a larger gradient suggests a bigger adjustment might be needed.
+Aquí es donde entran los **gradientes**. El gradiente de la función de pérdida con respecto a un parámetro específico nos dice la "pendiente" de la pérdida en el valor actual de ese parámetro. Apunta en la dirección del *mayor aumento* de la pérdida. Entonces, si queremos *disminuir* la pérdida, empujamos el parámetro en la dirección *opuesta* al gradiente (la flecha púrpura en la imagen de arriba). El tamaño del gradiente también nos dice qué tan sensible es la pérdida a ese parámetro – un gradiente más grande sugiere que podría necesitarse un ajuste mayor.
 
-Calculating these gradients for every parameter allows the model to iteratively improve, step-by-step, reducing its error. This process is the heart of training most ML models.
+Calcular estos gradientes para cada parámetro permite al modelo mejorar iterativamente, paso a paso, reduciendo su error. Este proceso es el corazón del entrenamiento de la mayoría de modelos de ML.
 
-## Why "Automatic" Differentiation?
+## ¿Por qué Diferenciación "Automática"?
 
-Okay, so we need gradients. For a simple function like $y = a \times b + c$, we can find the gradients ($\frac{\partial y}{\partial a}$, $\frac{\partial y}{\partial b}$, $\frac{\partial y}{\partial c}$) using basic calculus rules (like the chain rule).
+Bien, entonces necesitamos gradientes. Para una función simple como $y = a \times b + c$, podemos encontrar los gradientes ($\frac{\partial y}{\partial a}$, $\frac{\partial y}{\partial b}$, $\frac{\partial y}{\partial c}$) usando reglas básicas de cálculo (como la regla de la cadena).
 
-But modern neural networks are *vastly* more complex. They are essentially giant, nested mathematical functions with potentially millions of parameters. Calculating all those gradients manually is practically impossible and incredibly prone to errors.
+Pero las redes neuronales modernas son *vastamente* más complejas. Son esencialmente funciones matemáticas gigantes y anidadas con potencialmente millones de parámetros. Calcular todos esos gradientes manualmente es prácticamente imposible e increíblemente propenso a errores.
 
-**Automatic Differentiation (AutoDiff)** is the solution. It's a technique where the computer itself keeps track of every single mathematical operation performed, building a computational graph. Then, by applying the chain rule systematically backwards through this graph (a process called **backpropagation**), it can efficiently compute the gradient of the final output (the loss) with respect to every single input and parameter involved.
+**La Diferenciación Automática (AutoDiff)** es la solución. Es una técnica donde la computadora misma lleva registro de cada operación matemática realizada, construyendo un grafo computacional. Luego, aplicando la regla de la cadena sistemáticamente hacia atrás a través de este grafo (un proceso llamado **retropropagación**), puede calcular eficientemente el gradiente de la salida final (la pérdida) con respecto a cada entrada y parámetro involucrado.
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/75372083-69b3-47b4-959d-609d7f426751" width="600">
 </div>
 
-## Implementing AutoDiff with `Value`
+## Implementando AutoDiff con `Value`
 
-This library uses the `Value` class to implement Automatic Differentiation.
+Esta librería usa la clase `Value` para implementar Diferenciación Automática.
 
-*(If you want a deep dive, the concept of backpropagation and automatic differentiation is greatly explained in this [Andrej Karpathy video](https://www.youtube.com/watch?v=VMj-3S1tku0), highly recommended!)*
+*(Si quieres una inmersión profunda, el concepto de retropropagación y diferenciación automática está muy bien explicado en este [video de Andrej Karpathy](https://www.youtube.com/watch?v=VMj-3S1tku0), ¡muy recomendado!)*
 
-**What is a `Value`?**
+**¿Qué es un `Value`?**
 
-Think of a `Value` object as a smart container for a single number (a scalar). It doesn't just hold the number; it prepares for gradient calculations. It stores:
-1.  `data`: The actual numerical value (e.g., 5.0, -3.2).
-2.  `grad`: The gradient of the *final output* of our entire computation graph with respect to *this* specific `Value`'s data. It starts at 0 and gets filled during backpropagation.
+Piensa en un objeto `Value` como un contenedor inteligente para un solo número (un escalar). No solo contiene el número; se prepara para cálculos de gradientes. Almacena:
+1.  `data`: El valor numérico actual (ej., 5.0, -3.2).
+2.  `grad`: El gradiente de la *salida final* de todo nuestro grafo computacional con respecto a los *datos* específicos de este `Value`. Empieza en 0 y se llena durante la retropropagación.
 
-**Building the Calculation Trail (Computational Graph)**
+**Construyendo el Rastro de Cálculo (Grafo Computacional)**
 
-The clever part happens when you perform mathematical operations (like `+`, `*`, `exp`, `tanh`, etc.) using `Value` objects. Each time you combine `Value` objects, you create a *new* `Value` object. This new object internally remembers:
-* Its own `data` (the result of the operation).
-* The operation that created it (`_op`).
-* The original `Value` objects that were its inputs (`_children` or `_prev`).
+La parte inteligente sucede cuando realizas operaciones matemáticas (como `+`, `*`, `exp`, `tanh`, etc.) usando objetos `Value`. Cada vez que combinas objetos `Value`, creas un *nuevo* objeto `Value`. Este nuevo objeto internamente recuerda:
+* Sus propios `data` (el resultado de la operación).
+* La operación que lo creó (`_op`).
+* Los objetos `Value` originales que fueron sus entradas (`_children` o `_prev`).
 
-This implicitly builds a computational graph, step-by-step, tracing the lineage of the calculation from the initial inputs to the final result. For example:
+Esto implícitamente construye un grafo computacional, paso a paso, rastreando el linaje del cálculo desde las entradas iniciales hasta el resultado final. Por ejemplo:
 
 ```python
 a = Value(2.0)
 b = Value(3.0)
 c = Value(4.0)
-# d 'knows' it resulted from a * b
+# d 'sabe' que resultó de a * b
 d = a * b  # d._op = "*", d._prev = {a, b}
-# y 'knows' it resulted from d + c
+# y 'sabe' que resultó de d + c
 y = d + c  # y._op = "+", y._prev = {d, c}
 ```
 
-**Backpropagation: Calculating Gradients Automatically**
+**Retropropagación: Calculando Gradientes Automáticamente**
 
-So, how do we get the gradients without doing the calculus ourselves? By calling the `.backward()` method on the final `Value` object (the one representing our overall loss, like y in the simple example).
+Entonces, ¿cómo obtenemos los gradientes sin hacer el cálculo nosotros mismos? Llamando al método `.backward()` en el objeto `Value` final (el que representa nuestra pérdida general, como y en el ejemplo simple).
 
-Here’s the process conceptually:
+Aquí está el proceso conceptualmente:
 
-1. Start at the end (`y`). The gradient of `y` with respect to itself is 1. So, we set `y.grad = 1`.
+1. Empezar al final (`y`). El gradiente de `y` con respecto a sí mismo es 1. Así que, establecemos `y.grad = 1`.
 
-2. `y` knows it came from `d + c`. Using the chain rule for addition ($\frac{\partial y}{\partial d} = 1$, $\frac{\partial y}{\partial c} = 1$), it passes its gradient back. It tells `d` to add `1 * y.grad` to its gradient, and tells `c` to add `1 * y.grad` to its gradient. So, `d.grad` becomes 1 and `c.grad` becomes 1.
+2. `y` sabe que vino de `d + c`. Usando la regla de la cadena para suma ($\frac{\partial y}{\partial d} = 1$, $\frac{\partial y}{\partial c} = 1$), pasa su gradiente hacia atrás. Le dice a `d` que agregue `1 * y.grad` a su gradiente, y le dice a `c` que agregue `1 * y.grad` a su gradiente. Así, `d.grad` se convierte en 1 y `c.grad` se convierte en 1.
 
-3. `d` knows it came from `a * b`. Using the chain rule for multiplication ($\frac{\partial d}{\partial a} = b$, $\frac{\partial d}{\partial b} = a$), it passes its received gradient (`d.grad`) back. It tells `a` to add `b.data * d.grad` to its gradient, and tells `b` to add `a.data * d.grad` to its gradient. So `a.grad` becomes $3.0 \times 1 = 3.0$ and `b.grad` becomes $2.0 \times 1 = 2.0$.
+3. `d` sabe que vino de `a * b`. Usando la regla de la cadena para multiplicación ($\frac{\partial d}{\partial a} = b$, $\frac{\partial d}{\partial b} = a$), pasa su gradiente recibido (`d.grad`) hacia atrás. Le dice a `a` que agregue `b.data * d.grad` a su gradiente, y le dice a `b` que agregue `a.data * d.grad` a su gradiente. Así `a.grad` se convierte en $3.0 \times 1 = 3.0$ y `b.grad` se convierte en $2.0 \times 1 = 2.0$.
 
-4. This process continues recursively backwards through the graph until all `Value` objects that contributed to the final result have their gradients computed.
+4. Este proceso continúa recursivamente hacia atrás a través del grafo hasta que todos los objetos `Value` que contribuyeron al resultado final tienen sus gradientes calculados.
 
-Each `Value` object stores a tiny function (`_backward`) that knows how to compute the local gradients for the operation it represents (+, *, tanh, etc.). The `.backward()` method orchestrates calling these small functions in the correct reverse order (using a topological sort) to implement the chain rule across the entire graph.
+Cada objeto `Value` almacena una pequeña función (`_backward`) que sabe cómo calcular los gradientes locales para la operación que representa (+, *, tanh, etc.). El método `.backward()` orquesta llamar a estas pequeñas funciones en el orden inverso correcto (usando un ordenamiento topológico) para implementar la regla de la cadena a través de todo el grafo.
 
-After calling `.backward()`, `a.grad`, `b.grad`, and `c.grad` hold the gradients, telling you exactly how sensitive the final output `y` is to changes in the initial inputs `a`, `b`, and `c`.
+Después de llamar `.backward()`, `a.grad`, `b.grad`, y `c.grad` contienen los gradientes, diciéndote exactamente qué tan sensible es la salida final `y` a cambios en las entradas iniciales `a`, `b`, y `c`.
 
-## Handling N-Dimensional Arrays of Values with `MLArray`
+## Manejando Arrays N-Dimensionales de Values con `MLArray`
 
-> **IMPORTANT NOTE**: `MLArray` is by far the most complex class of the library. If you are implementing this library by yourself while following along, I recommend just copying the provided `mlarray.py` for now, and make your own implementation at the end, as making it from scratch will probably take you a lot of time (and headaches!).
+> **NOTA IMPORTANTE**: `MLArray` es por mucho la clase más compleja de la librería. Si estás implementando esta librería por ti mismo mientras sigues el tutorial, recomiendo simplemente copiar el `mlarray.py` proporcionado por ahora, y hacer tu propia implementación al final, ya que hacerlo desde cero probablemente te tome mucho tiempo (¡y dolores de cabeza!).
 
-While `Value` objects handle the core AutoDiff for single numbers, machine learning thrives on vectors, matrices, and higher-dimensional tensors. We need an efficient way to manage collections of these smart Value objects. This is the job of the MLArray class.
+Mientras que los objetos `Value` manejan el AutoDiff núcleo para números individuales, el machine learning prospera con vectores, matrices y tensores de dimensiones superiores. Necesitamos una manera eficiente de manejar colecciones de estos objetos Value inteligentes. Este es el trabajo de la clase MLArray.
 
-What is an `MLArray`?
+¿Qué es un `MLArray`?
 
-Think of `MLArray` as an N-dimensional array (like NumPy arrays, but built from scratch here). It can be a list (1D), a list-of-lists (2D matrix), or nested deeper for higher dimensions.
+Piensa en `MLArray` como un array N-dimensional (como arrays de NumPy, pero construido desde cero aquí). Puede ser una lista (1D), una lista-de-listas (matriz 2D), o anidado más profundamente para dimensiones superiores.
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/29606bb9-fa55-457c-b2ac-120596aebc11" width="600">
 </div>
 
-The crucial difference from a standard Python list is that every number you put into an MLArray is automatically converted into a `Value` object. This happens recursively in the `_process_data` method during initialization.
+La diferencia crucial de una lista estándar de Python es que cada número que pongas en un MLArray se convierte automáticamente en un objeto `Value`. Esto sucede recursivamente en el método `_process_data` durante la inicialización.
 
 ```python
-# Creates a 2x2 MLArray; 1.0, 2.0, 3.0, 4.0 are now Value objects
+# Crea un MLArray 2x2; 1.0, 2.0, 3.0, 4.0 ahora son objetos Value
 my_matrix = MLArray([[1.0, 2.0], [3.0, 4.0]])
 ```
 
-This ensures that any calculations performed using the `MLArray` will automatically build the computational graph needed for backpropagation.
+Esto asegura que cualquier cálculo realizado usando el `MLArray` automáticamente construirá el grafo computacional necesario para la retropropagación.
 
-**Operations on Arrays**
+**Operaciones en Arrays**
 
-The idea of `MLArray` is to support many standard numerical operations, designed to work seamlessly with the underlying `Value` objects:
+La idea de `MLArray` es soportar muchas operaciones numéricas estándar, diseñadas para trabajar sin problemas con los objetos `Value` subyacentes:
 
-- **Element-wise operations**: `+`, `-`, `*`, `/`, `**` (power), `exp()`, `log()`, `tanh()`, etc.. When you add two `MLArray`s, the library iterates through corresponding elements and performs the `Value.__add__` (or the corresponding operation, like `__mul__` for multiplication, and so on) operation on each pair (handled by `_element_wise_operation`). This builds the graph element by element.
-- **Matrix Multiplication**: `matmul()` or the `@` operator. This performs the dot product logic, correctly combining the underlying `Value` multiplications and additions to construct the appropriate graph structure.
-- **Reductions**: `sum()`, `mean()`, `max()`, `min()`, `std()`. These operations aggregate `Value` objects across the array or along specified axes, again building the graph correctly.
-- **Shape Manipulation**: `transpose()` (or `.T`), `reshape()`. These rearrange the `Value` objects into different array shapes without changing the objects themselves, preserving the graph connections.
-- **Broadcasting**: Operations between arrays of different but compatible shapes (e.g., adding a vector to each row of a matrix) are handled automatically, figuring out how to apply operations element-wise based on broadcasting rules (`_broadcast_shapes`, `_broadcast_and_apply`).
+- **Operaciones elemento por elemento**: `+`, `-`, `*`, `/`, `**` (potencia), `exp()`, `log()`, `tanh()`, etc.. Cuando sumas dos `MLArray`s, la librería itera a través de elementos correspondientes y realiza la operación `Value.__add__` (o la operación correspondiente, como `__mul__` para multiplicación, y así sucesivamente) en cada par (manejado por `_element_wise_operation`). Esto construye el grafo elemento por elemento.
+- **Multiplicación de Matrices**: `matmul()` o el operador `@`. Esto realiza la lógica del producto punto, combinando correctamente las multiplicaciones y sumas de `Value` subyacentes para construir la estructura de grafo apropiada.
+- **Reducciones**: `sum()`, `mean()`, `max()`, `min()`, `std()`. Estas operaciones agregan objetos `Value` a través del array o a lo largo de ejes especificados, nuevamente construyendo el grafo correctamente.
+- **Manipulación de Forma**: `transpose()` (o `.T`), `reshape()`. Estas reorganizan los objetos `Value` en diferentes formas de array sin cambiar los objetos mismos, preservando las conexiones del grafo.
+- **Broadcasting**: Las operaciones entre arrays de formas diferentes pero compatibles (ej., agregar un vector a cada fila de una matriz) se manejan automáticamente, determinando cómo aplicar operaciones elemento por elemento basándose en reglas de broadcasting (`_broadcast_shapes`, `_broadcast_and_apply`).
 
-**Getting Gradients for Arrays**
+**Obteniendo Gradientes para Arrays**
 
-Just like with a single `Value`, you can perform a complex sequence of `MLArray` operations. Typically, your final result will be a single scalar `Value` representing the loss (often achieved by using `.sum()` or `.mean()` at the end).
+Así como con un solo `Value`, puedes realizar una secuencia compleja de operaciones `MLArray`. Típicamente, tu resultado final será un `Value` escalar que representa la pérdida (a menudo logrado usando `.sum()` o `.mean()` al final).
 
-You then call `.backward()` on this final scalar `MLArray` (or the `Value` inside it). This triggers the backpropagation process through all the interconnected `Value` objects that were part of the calculation.
+Luego llamas `.backward()` en este `MLArray` escalar final (o el `Value` dentro de él). Esto dispara el proceso de retropropagación a través de todos los objetos `Value` interconectados que fueron parte del cálculo.
 
-After `.backward()` has run, you can access the computed gradients for any `MLArray` involved in the original computation using its `.grad()` method. This returns a new `MLArray` of the same shape, where each element holds the gradient corresponding to the original `Value` object.
+Después de que `.backward()` haya corrido, puedes acceder a los gradientes calculados para cualquier `MLArray` involucrado en el cómputo original usando su método `.grad()`. Esto retorna un nuevo `MLArray` de la misma forma, donde cada elemento contiene el gradiente correspondiente al objeto `Value` original.
 
 ```python
-# Example using ml_array.py and value.py
+# Ejemplo usando ml_array.py y value.py
 
-# Input data (e.g., batch of 2 samples, 2 features each)
+# Datos de entrada (ej., lote de 2 muestras, 2 características cada una)
 x = MLArray([[1.0, 2.0], [3.0, 4.0]])
-# Weights (e.g., simple linear layer mapping 2 features to 1 output)
+# Pesos (ej., capa lineal simple mapeando 2 características a 1 salida)
 w = MLArray([[0.5], [-0.5]])
 
-# --- Forward Pass (Builds the graph) ---
-# Matrix multiplication
+# --- Paso Hacia Adelante (Construye el grafo) ---
+# Multiplicación de matrices
 z = x @ w
-# Apply activation function (element-wise)
+# Aplicar función de activación (elemento por elemento)
 a = z.tanh()
-# Calculate total loss (e.g., sum of activations)
-L = a.sum() # L is now a scalar MLArray containing one Value
+# Calcular pérdida total (ej., suma de activaciones)
+L = a.sum() # L ahora es un MLArray escalar conteniendo un Value
 
-# --- Backward Pass (Calculates gradients) ---
-L.backward() # Triggers Value.backward() across the graph
+# --- Paso Hacia Atrás (Calcula gradientes) ---
+L.backward() # Dispara Value.backward() a través del grafo
 
-# --- Inspect Gradients ---
-# Gradient of L w.r.t. each element in x
-print("Gradient w.r.t. x:")
+# --- Inspeccionar Gradientes ---
+# Gradiente de L w.r.t. cada elemento en x
+print("Gradiente w.r.t. x:")
 print(x.grad())
-# Gradient of L w.r.t. each element in w
-print("\nGradient w.r.t. w:")
+# Gradiente de L w.r.t. cada elemento en w
+print("\nGradiente w.r.t. w:")
 print(w.grad())
 ```
 
-**Utility Functions & Properties**
+**Funciones de Utilidad y Propiedades**
 
-The library also includes helpers:
+La librería también incluye ayudantes:
 
-- `zeros()`, `ones()`, `randn()`: Create `MLArray`s filled with zeros, ones, or standard random numbers.
-- `xavier_uniform()`, `xavier_normal()`: Implement common strategies for initializing weight matrices in neural networks.
-- `to_list()`: Convert an `MLArray` back to a standard Python list (this extracts the `.data` and discards gradient information).
-- `shape`: A property to quickly get the dimensions tuple of the `MLArray`.
-- `size()`: Returns the total number of elements in the `MLArray`.
+- `zeros()`, `ones()`, `randn()`: Crear `MLArray`s llenos de ceros, unos, o números aleatorios estándar.
+- `xavier_uniform()`, `xavier_normal()`: Implementan estrategias comunes para inicializar matrices de pesos en redes neuronales.
+- `to_list()`: Convertir un `MLArray` de vuelta a una lista estándar de Python (esto extrae el `.data` y descarta información de gradientes).
+- `shape`: Una propiedad para obtener rápidamente la tupla de dimensiones del `MLArray`.
+- `size()`: Retorna el número total de elementos en el `MLArray`.
 
-## Putting It Together
+## Juntándolo Todo
 
-With these two core components:
+Con estos dos componentes núcleo:
 
-- A `Value` class that encapsulates a single number and enables automatic differentiation by tracking operations and applying the chain rule via backpropagation.
-- An `MLArray` class that organizes these `Value` objects into N-dimensional arrays and extends mathematical operations (like matrix multiplication, broadcasting) to work seamlessly within the AutoDiff framework.
+- Una clase `Value` que encapsula un solo número y habilita diferenciación automática rastreando operaciones y aplicando la regla de la cadena vía retropropagación.
+- Una clase `MLArray` que organiza estos objetos `Value` en arrays N-dimensionales y extiende operaciones matemáticas (como multiplicación de matrices, broadcasting) para trabajar sin problemas dentro del framework de AutoDiff.
 
-We have the essential toolkit to build and, more importantly, train various machine learning models, like simple neural networks, entirely from scratch. We can now define network layers, compute loss functions, and use the calculated gradients to update parameters and make our models learn!
+Tenemos el kit de herramientas esencial para construir y, más importante, entrenar varios modelos de machine learning, como redes neuronales simples, completamente desde cero. ¡Ahora podemos definir capas de red, calcular funciones de pérdida, y usar los gradientes calculados para actualizar parámetros y hacer que nuestros modelos aprendan!

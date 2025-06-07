@@ -1,18 +1,18 @@
 # smolml/__init__.py
 
-# Import core components
+# Importar componentes centrales (core components)
 from .core import MLArray, Value
 
-# Import models
+# Importar modelos (models)
 from .models.nn import DenseLayer, NeuralNetwork
 from .models.regression import LinearRegression, PolynomialRegression
 from .models.tree import DecisionTree, RandomForest
 from .models.unsupervised import KMeans
 
-# Import preprocessing
+# Importar preprocesamiento (preprocessing)
 from .preprocessing import StandardScaler, MinMaxScaler
 
-# Import utilities
+# Importar utilidades (utilities)
 from .utils.activation import (
     relu, leaky_relu, elu, sigmoid, softmax, tanh, linear
 )
@@ -28,34 +28,34 @@ from .utils.optimizers import (
 )
 from .utils.memory import (format_size, calculate_value_size, calculate_mlarray_size, calculate_neural_network_size)
 
-# Version of the smolml package
+# Versión del paquete smolml
 __version__ = '0.1.0'
 
 __all__ = [
-    # Core
+    # Núcleo (Core)
     'MLArray',
     'Value',
     
-    # Models - Neural Networks
+    # Modelos - Redes Neuronales (Models - Neural Networks)
     'DenseLayer',
     'NeuralNetwork',
     
-    # Models - Regression
+    # Modelos - Regresión (Models - Regression)
     'LinearRegression',
     'PolynomialRegression',
     
-    # Models - Tree-based
+    # Modelos - Basados en Árboles (Models - Tree-based)
     'DecisionTree',
     'RandomForest',
 
-    # Models - Unsupervised
+    # Modelos - No Supervisado (Models - Unsupervised)
     'KMeans',
     
-    # Preprocessing
+    # Preprocesamiento (Preprocessing)
     'StandardScaler',
     'MinMaxScaler',
     
-    # Utils - Activation Functions
+    # Utilidades - Funciones de Activación (Utils - Activation Functions)
     'relu',
     'leaky_relu',
     'elu',
@@ -64,13 +64,13 @@ __all__ = [
     'tanh',
     'linear',
     
-    # Utils - Initializers
+    # Utilidades - Inicializadores (Utils - Initializers)
     'WeightInitializer',
     'XavierUniform',
     'XavierNormal',
     'HeInitialization',
     
-    # Utils - Loss Functions
+    # Utilidades - Funciones de Pérdida (Utils - Loss Functions)
     'mse_loss',
     'mae_loss',
     'binary_cross_entropy',
@@ -78,14 +78,14 @@ __all__ = [
     'huber_loss',
     'log_cosh_loss',
     
-    # Utils - Optimizers
+    # Utilidades - Optimizadores (Utils - Optimizers)
     'Optimizer',
     'SGD',
     'SGDMomentum',
     'AdaGrad',
     'Adam',
 
-    # Utils - Memory
+    # Utilidades - Memoria (Utils - Memory)
     'format_size',
     'calculate_value_size',
     'calculate_mlarray_size',

@@ -10,23 +10,23 @@ from smolml.core.ml_array import MLArray
 
 class TestActivationsVsTensorflow(unittest.TestCase):
     """
-    Tests comparing custom activation functions against TensorFlow implementations
+    Tests comparando funciones de activación personalizadas contra implementaciones de TensorFlow
     """
     
     def setUp(self):
         """
-        Set up test data in different shapes for thorough testing
+        Configurar datos de prueba en diferentes formas para testing exhaustivo
         """
-        # Random seed for reproducibility
+        # Semilla aleatoria para reproducibilidad
         np.random.seed(42)
         
-        # Generate test data
+        # Generar datos de prueba
         self.scalar_np = np.random.randn()
         self.vector_np = np.random.randn(5)
         self.matrix_np = np.random.randn(3, 4)
         self.tensor_np = np.random.randn(2, 3, 4)
         
-        # Convert to MLArray format
+        # Convertir a formato MLArray
         self.scalar_ml = MLArray(float(self.scalar_np))
         self.vector_ml = MLArray([float(x) for x in self.vector_np])
         self.matrix_ml = MLArray([[float(x) for x in row] for row in self.matrix_np])
@@ -34,22 +34,22 @@ class TestActivationsVsTensorflow(unittest.TestCase):
 
     def _compare_outputs(self, ml_output, tf_output, places=5):
         """
-        Helper method to compare MLArray output with TensorFlow output
+        Método auxiliar para comparar salida MLArray con salida TensorFlow
         """
-        # Convert MLArray output to regular Python list/float
-        if len(ml_output.shape) == 0:  # scalar
+        # Convertir salida MLArray a lista/float regular de Python
+        if len(ml_output.shape) == 0:  # escalar
             ml_result = ml_output.data.data
             tf_result = float(tf_output.numpy())
             self.assertAlmostEqual(ml_result, tf_result, places=places)
         else:
             ml_result = ml_output.to_list()
             tf_result = tf_output.numpy()
-            # Recursively compare nested structures
+            # Comparar recursivamente estructuras anidadas
             self._compare_nested(ml_result, tf_result, places)
 
     def _compare_nested(self, ml_list, tf_array, places):
         """
-        Recursively compare nested lists with numpy arrays
+        Comparar recursivamente listas anidadas con arrays numpy
         """
         if isinstance(ml_list, (int, float)):
             self.assertAlmostEqual(ml_list, float(tf_array), places=places)
@@ -59,91 +59,91 @@ class TestActivationsVsTensorflow(unittest.TestCase):
 
     def _print_comparison(self, name, ml_result, tf_result, input_shape=""):
         """
-        Print a formatted comparison of MLArray and TensorFlow results
+        Imprimir comparación formateada de resultados MLArray y TensorFlow
         """
         print(f"\n{'-'*80}")
-        print(f"{name} Comparison {input_shape}")
+        print(f"Comparación {name} {input_shape}")
         print(f"{'-'*80}")
-        print("MLArray output:")
+        print("Salida MLArray:")
         if isinstance(ml_result, (int, float)):
             print(f"{ml_result:.6f}")
         else:
             print(np.array(ml_result))
-        print("\nTensorFlow output:")
+        print("\nSalida TensorFlow:")
         print(f"{tf_result.numpy()}")
         print(f"{'-'*80}\n")
 
     def test_relu(self):
         """
-        Test ReLU activation against TensorFlow
+        Probar activación ReLU contra TensorFlow
         """
-        # Test vector case (for example output)
+        # Probar caso vector (para salida de ejemplo)
         ml_result = activation.relu(self.vector_ml)
         tf_result = tf.nn.relu(self.vector_np)
-        self._print_comparison("ReLU", ml_result.to_list(), tf_result, f"input shape={self.vector_np.shape}")
+        self._print_comparison("ReLU", ml_result.to_list(), tf_result, f"forma entrada={self.vector_np.shape}")
         self._compare_outputs(ml_result, tf_result)
 
     def test_sigmoid(self):
         """
-        Test sigmoid activation against TensorFlow
+        Probar activación sigmoid contra TensorFlow
         """
-        # Test matrix case (for example output)
+        # Probar caso matriz (para salida de ejemplo)
         ml_result = activation.sigmoid(self.matrix_ml)
         tf_result = tf.nn.sigmoid(self.matrix_np)
-        self._print_comparison("Sigmoid", ml_result.to_list(), tf_result, f"input shape={self.matrix_np.shape}")
+        self._print_comparison("Sigmoid", ml_result.to_list(), tf_result, f"forma entrada={self.matrix_np.shape}")
         self._compare_outputs(ml_result, tf_result)
 
     def test_tanh(self):
         """
-        Test tanh activation against TensorFlow
+        Probar activación tanh contra TensorFlow
         """
-        # Test matrix case (for example output)
+        # Probar caso matriz (para salida de ejemplo)
         ml_result = activation.tanh(self.matrix_ml)
         tf_result = tf.nn.tanh(self.matrix_np)
-        self._print_comparison("Tanh", ml_result.to_list(), tf_result, f"input shape={self.matrix_np.shape}")
+        self._print_comparison("Tanh", ml_result.to_list(), tf_result, f"forma entrada={self.matrix_np.shape}")
         self._compare_outputs(ml_result, tf_result)
 
     def test_softmax(self):
         """
-        Test softmax activation against TensorFlow
+        Probar activación softmax contra TensorFlow
         """
-        # Test vector case
+        # Probar caso vector
         ml_result = activation.softmax(self.vector_ml)
         tf_result = tf.nn.softmax(self.vector_np)
-        self._print_comparison("Softmax (vector)", ml_result.to_list(), tf_result, f"input shape={self.vector_np.shape}")
+        self._print_comparison("Softmax (vector)", ml_result.to_list(), tf_result, f"forma entrada={self.vector_np.shape}")
         self._compare_outputs(ml_result, tf_result)
         
-        # Test matrix case (last axis)
+        # Probar caso matriz (último eje)
         ml_result = activation.softmax(self.matrix_ml)
         tf_result = tf.nn.softmax(self.matrix_np)
-        self._print_comparison("Softmax (matrix, last axis)", ml_result.to_list(), tf_result, f"input shape={self.matrix_np.shape}")
+        self._print_comparison("Softmax (matriz, último eje)", ml_result.to_list(), tf_result, f"forma entrada={self.matrix_np.shape}")
         self._compare_outputs(ml_result, tf_result)
         
-        # Test matrix case (axis=0)
+        # Probar caso matriz (eje=0)
         ml_result = activation.softmax(self.matrix_ml, axis=0)
         tf_result = tf.nn.softmax(self.matrix_np, axis=0)
-        self._print_comparison("Softmax (matrix, axis=0)", ml_result.to_list(), tf_result, f"input shape={self.matrix_np.shape}")
+        self._print_comparison("Softmax (matriz, eje=0)", ml_result.to_list(), tf_result, f"forma entrada={self.matrix_np.shape}")
         self._compare_outputs(ml_result, tf_result)
 
     def test_leaky_relu(self):
         """
-        Test leaky ReLU activation against TensorFlow
+        Probar activación leaky ReLU contra TensorFlow
         """
         alpha = 0.01
-        # Test matrix case (for example output)
+        # Probar caso matriz (para salida de ejemplo)
         ml_result = activation.leaky_relu(self.matrix_ml, alpha)
         tf_result = tf.nn.leaky_relu(self.matrix_np, alpha)
-        self._print_comparison("Leaky ReLU", ml_result.to_list(), tf_result, f"input shape={self.matrix_np.shape}")
+        self._print_comparison("Leaky ReLU", ml_result.to_list(), tf_result, f"forma entrada={self.matrix_np.shape}")
         self._compare_outputs(ml_result, tf_result)
 
     def test_elu(self):
         """
-        Test ELU activation against TensorFlow
+        Probar activación ELU contra TensorFlow
         """
-        # Test matrix case (for example output)
+        # Probar caso matriz (para salida de ejemplo)
         ml_result = activation.elu(self.matrix_ml)
         tf_result = tf.nn.elu(self.matrix_np)
-        self._print_comparison("ELU", ml_result.to_list(), tf_result, f"input shape={self.matrix_np.shape}")
+        self._print_comparison("ELU", ml_result.to_list(), tf_result, f"forma entrada={self.matrix_np.shape}")
         self._compare_outputs(ml_result, tf_result)
 
 if __name__ == '__main__':

@@ -18,48 +18,48 @@ import smolml.utils.optimizers as optimizers
 
 class TestNeuralNetworkVsTensorflow(unittest.TestCase):
     """
-    Compare custom neural network implementation against TensorFlow
-    using the make_moons dataset
+    Comparar implementación de red neuronal personalizada contra TensorFlow
+    usando el conjunto de datos make_moons
     """
     
     def setUp(self):
         """
-        Set up dataset and models
+        Configurar conjunto de datos y modelos
         """
-        # Set random seeds for reproducibility
+        # Establecer semillas aleatorias para reproducibilidad
         np.random.seed(42)
         tf.random.set_seed(42)
         
-        # Generate moon dataset
+        # Generar conjunto de datos luna
         X, y = make_moons(n_samples=100, noise=0.1)
         self.scaler = StandardScaler()
         X = self.scaler.fit_transform(X)
         
-        # Split data
+        # Dividir datos
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
         
-        # Convert data for custom implementation
+        # Convertir datos para implementación personalizada
         self.X_train_ml = MLArray([[float(x) for x in row] for row in self.X_train])
         self.y_train_ml = MLArray([[float(y)] for y in self.y_train])
         self.X_test_ml = MLArray([[float(x) for x in row] for row in self.X_test])
         self.y_test_ml = MLArray([[float(y)] for y in self.y_test])
         
-        # Model parameters
+        # Parámetros del modelo
         self.input_size = 2
         self.hidden_size = 32
         self.output_size = 1
         self.epochs = 100
         self.learning_rate = 0.05
         
-        # Initialize models
+        # Inicializar modelos
         self.custom_model = self._create_custom_model()
         self.tf_model = self._create_tf_model()
 
     def _create_custom_model(self):
         """
-        Create custom neural network with same architecture
+        Crear red neuronal personalizada con la misma arquitectura
         """
         return NeuralNetwork([
             DenseLayer(self.input_size, self.hidden_size, activation.relu),
@@ -68,7 +68,7 @@ class TestNeuralNetworkVsTensorflow(unittest.TestCase):
 
     def _create_tf_model(self):
         """
-        Create equivalent TensorFlow model
+        Crear modelo TensorFlow equivalente
         """
         model = tf.keras.Sequential([
             tf.keras.layers.Dense(self.hidden_size, activation='relu', input_shape=(self.input_size,)),
@@ -81,14 +81,14 @@ class TestNeuralNetworkVsTensorflow(unittest.TestCase):
 
     def _plot_decision_boundary(self, model, is_tf=False):
         """
-        Plot decision boundary for either model
+        Graficar frontera de decisión para cualquier modelo
         """
         x_min, x_max = self.X_test[:, 0].min() - 0.5, self.X_test[:, 0].max() + 0.5
         y_min, y_max = self.X_test[:, 1].min() - 0.5, self.X_test[:, 1].max() + 0.5
         xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100),
                             np.linspace(y_min, y_max, 100))
         
-        # Get predictions for mesh grid points
+        # Obtener predicciones para puntos de malla
         if is_tf:
             Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
         else:
@@ -100,11 +100,11 @@ class TestNeuralNetworkVsTensorflow(unittest.TestCase):
 
     def test_compare_models(self):
         """
-        Train and compare both models
+        Entrenar y comparar ambos modelos
         """
-        print("IMPORTANT: SmolML implementation of NNs is very inefficient due to being written in Python. Running this in a low-hardware machine might take a long time.")
-        # Train custom model
-        print("\nTraining custom model...")
+        print("IMPORTANTE: La implementación SmolML de RNs es muy ineficiente debido a estar escrita en Python. Ejecutar esto en una máquina de bajo hardware podría tomar mucho tiempo.")
+        # Entrenar modelo personalizado
+        print("\nEntrenando modelo personalizado...")
         custom_history = []
         for epoch in range(self.epochs):
             y_pred = self.custom_model.forward(self.X_train_ml)
@@ -114,7 +114,7 @@ class TestNeuralNetworkVsTensorflow(unittest.TestCase):
             for idx, layer in enumerate(self.custom_model.layers):
                 layer.update(self.custom_model.optimizer, idx)
             
-            # Reset computational graph
+            # Reiniciar grafo computacional
             self.X_train_ml = self.X_train_ml.restart()
             self.y_train_ml = self.y_train_ml.restart()
             for layer in self.custom_model.layers:
@@ -122,10 +122,10 @@ class TestNeuralNetworkVsTensorflow(unittest.TestCase):
                 layer.biases = layer.biases.restart()
             
             custom_history.append(float(loss.data.data))
-            print(f"Epoch {epoch + 1}/{self.epochs}, Loss: {loss.data.data}")
+            print(f"Época {epoch + 1}/{self.epochs}, Pérdida: {loss.data.data}")
         
-        # Train TensorFlow model
-        print("\nTraining TensorFlow model...")
+        # Entrenar modelo TensorFlow
+        print("\nEntrenando modelo TensorFlow...")
         tf_history = self.tf_model.fit(
             self.X_train, self.y_train,
             epochs=self.epochs,
@@ -133,47 +133,47 @@ class TestNeuralNetworkVsTensorflow(unittest.TestCase):
             verbose=1
         )
         
-        # Plot training curves
+        # Graficar curvas de entrenamiento
         plt.figure(figsize=(12, 4))
 
-        print("\n Plotting training loss...")
-        # Plot 1: Training Loss
+        print("\n Graficando pérdida de entrenamiento...")
+        # Gráfico 1: Pérdida de Entrenamiento
         plt.subplot(1, 2, 1)
-        plt.plot(range(self.epochs), custom_history, label='Custom NN')  # Changed this line
+        plt.plot(range(self.epochs), custom_history, label='RN Personalizada')
         plt.plot(range(self.epochs), tf_history.history['loss'], label='TensorFlow')
-        plt.title('Training Loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
+        plt.title('Pérdida de Entrenamiento')
+        plt.xlabel('Época')
+        plt.ylabel('Pérdida')
         plt.legend()
         
-        # Plot 2: Decision Boundaries
+        # Gráfico 2: Fronteras de Decisión
         plt.subplot(1, 2, 2)
         
-        print("\n Plotting decision boundaries...")
-        # Plot decision boundaries
+        print("\n Graficando fronteras de decisión...")
+        # Graficar fronteras de decisión
         xx, yy, Z_custom = self._plot_decision_boundary(self.custom_model)
         plt.contourf(xx, yy, Z_custom > 0.5, alpha=0.4)
         plt.scatter(self.X_test[:, 0], self.X_test[:, 1], c=self.y_test, alpha=0.8)
-        plt.title('Decision Boundaries (Custom NN)')
+        plt.title('Fronteras de Decisión (RN Personalizada)')
         
         plt.tight_layout()
-        plt.savefig('neural_network_comparison.png')
+        plt.savefig('comparacion_red_neuronal.png')
         plt.close()
         
-        # Compute and print accuracies
+        # Calcular e imprimir precisiones
         custom_pred = np.array(self.custom_model.forward(self.X_test_ml).to_list()) > 0.5
         tf_pred = self.tf_model.predict(self.X_test) > 0.5
         
         custom_accuracy = np.mean(custom_pred.flatten() == self.y_test)
         tf_accuracy = np.mean(tf_pred.flatten() == self.y_test)
         
-        print("\nTest Accuracies:")
-        print(f"Custom NN: {custom_accuracy:.4f}")
+        print("\nPrecisiones de Prueba:")
+        print(f"RN Personalizada: {custom_accuracy:.4f}")
         print(f"TensorFlow: {tf_accuracy:.4f}")
         
-        # Assert models achieve reasonable accuracy
-        self.assertGreater(custom_accuracy, 0.8, "Custom model accuracy should be > 80%")
-        self.assertGreater(tf_accuracy, 0.8, "TensorFlow model accuracy should be > 80%")
+        # Asegurar que los modelos alcancen precisión razonable
+        self.assertGreater(custom_accuracy, 0.8, "La precisión del modelo personalizado debería ser > 80%")
+        self.assertGreater(tf_accuracy, 0.8, "La precisión del modelo TensorFlow debería ser > 80%")
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,47 +1,47 @@
-# SmolML - Neural Networks: Backpropagation to the limit
+# SmolML - Redes Neuronales: Retropropagación hasta el límite
 
-Welcome to the neural network section of SmolML! Having established our Value objects for automatic differentiation and MLArray for handling data (see 'core' section), we can now build models that learn. This guide will walk you through the fundamental concepts, from a single neuron to a fully trainable neural network, and how they're represented in SmolML.
+Bienvenido a la sección de redes neuronales de SmolML! Habiendo establecido nuestros objetos Value para diferenciación automática y MLArray para manejar datos (ver sección 'core'), ahora podemos construir modelos que aprenden. Esta guía te llevará a través de los conceptos fundamentales, desde una sola neurona hasta una red neuronal completamente entrenable, y cómo se representan en SmolML.
 
-> **IMPORTANT**: As our implementation is made fully in Python, handling the automatic differentiation of an entire neural network is very computationally expensive. If you plan on running an example, we recommend starting with a very small network and then escalate. Creating a too big neural network for your computer might make it freeze 🙂 
+> **IMPORTANTE**: Como nuestra implementación está hecha completamente en Python, manejar la diferenciación automática de una red neuronal completa es muy costoso computacionalmente. Si planeas ejecutar un ejemplo, recomendamos empezar con una red muy pequeña y luego escalar. Crear una red neuronal demasiado grande para tu computadora podría hacer que se congele 🙂 
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/e5315fca-5dd6-4c9c-9cf3-bf46edfbb40c" width="600">
 </div>
 
-## The Neuron: A Tiny Decision Maker
+## La Neurona: Un Pequeño Tomador de Decisiones
 
-At the heart of a neural network is the neuron (or node). Think of it as a small computational unit that receives several inputs, processes them, and produces a single output.
+En el corazón de una red neuronal está la neurona (o nodo). Piensa en ella como una pequeña unidad computacional que recibe varias entradas, las procesa, y produce una sola salida.
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/2f95fdfe-1676-4a0b-9e10-95ecdf9155b6" width="600">
 </div>
 
-Here's what a neuron conceptually does:
+Esto es lo que una neurona hace conceptualmente:
 
-- **Weighted Sum**: Each input connection to the neuron has an associated weight. The neuron multiplies each input value by its corresponding weight. These weights are crucial – they are what the network learns by adjusting during training, determining the influence of each input.
-- **Bias**: The neuron then adds a bias term to this weighted sum. The bias allows the neuron to shift its output up or down, independent of its inputs. This helps the network fit data that doesn't necessarily pass through the origin.
-- **Activation Function**: Finally, the result of the weighted sum + bias is passed through an activation function. This function introduces non-linearity, which is vital. Without non-linearity, a stack of multiple layers would behave just like a single layer, limiting the network's ability to learn complex patterns. Common activation functions include ReLU, Tanh, and Sigmoid.
+- **Suma Ponderada (Weighted Sum)**: Cada conexión de entrada a la neurona tiene un peso asociado. La neurona multiplica cada valor de entrada por su peso correspondiente. Estos pesos son cruciales – son lo que la red aprende ajustando durante el entrenamiento, determinando la influencia de cada entrada.
+- **Sesgo (Bias)**: La neurona luego agrega un término de sesgo a esta suma ponderada. El sesgo permite a la neurona desplazar su salida hacia arriba o abajo, independiente de sus entradas. Esto ayuda a la red a ajustar datos que no necesariamente pasan por el origen.
+- **Función de Activación (Activation Function)**: Finalmente, el resultado de la suma ponderada + sesgo se pasa a través de una función de activación. Esta función introduce no linealidad, lo cual es vital. Sin no linealidad, una pila de múltiples capas se comportaría como una sola capa, limitando la habilidad de la red para aprender patrones complejos. Las funciones de activación comunes incluyen ReLU, Tanh, y Sigmoid.
 
-While SmolML doesn't have a standalone Neuron class for this section (as it's often more efficient to work with layers directly), the logic of many such neurons operating in parallel is encapsulated within our DenseLayer. Each output feature of a DenseLayer can be thought of as the output of one such conceptual neuron.
+Mientras SmolML no tiene una clase Neurona independiente para esta sección (ya que frecuentemente es más eficiente trabajar con capas directamente), la lógica de muchas de esas neuronas operando en paralelo está encapsulada dentro de nuestra DenseLayer. Cada característica de salida de una DenseLayer puede pensarse como la salida de una neurona conceptual.
 
-## Layers: Organizing Neurons
+## Capas: Organizando Neuronas
 
-A single neuron isn't very powerful on its own. Neural networks organize neurons into layers. The most common type is a Dense Layer (also known as a Fully Connected Layer).
+Una sola neurona no es muy poderosa por sí sola. Las redes neuronales organizan neuronas en capas. El tipo más común es una Capa Densa (Dense Layer) (también conocida como Capa Completamente Conectada).
 
-What does a Dense Layer do?
+¿Qué hace una capa densa?
 
-In a dense layer, every neuron in the layer receives input from every neuron in the previous layer (or from the raw input data if it's the first layer).
+En una capa densa, cada neurona en la capa recibe entrada de cada neurona en la capa anterior (o de los datos de entrada cruda si es la primera capa).
 
-Conceptually, a dense layer performs two main steps, building on the neuron's logic:
+Conceptualmente, una capa densa realiza dos pasos principales, construyendo sobre la lógica de la neurona:
 
-1. **Linear Transformation**: It takes an input vector (or a batch of input vectors) and performs a matrix multiplication with a weight matrix (`W`) and adds a bias vector (`b`).
-   - Each row in the input vector connects to each column in the weight matrix. If you have input_size features and want output_size features from this layer (i.e., output_size conceptual neurons), the weight matrix `W` will have a shape of (input_size, output_size). Each element $W_ij$ is the weight connecting the i-th input feature to the j-th neuron in the layer.
-   - The bias vector b will have output_size elements, one for each neuron.
-   - Mathematically: $z=input×W+b$.
-   - In SmolML, when you create a DenseLayer (from `layer.py`), you specify input_size and output_size. The layer then initializes self.weights (our `W`) and self.biases (our `b`) as `MLArray` objects. These are the learnable parameters of the layer.
+1. **Transformación Lineal (Linear Transformation)**: Toma un vector de entrada (o un lote de vectores de entrada) y realiza una multiplicación de matrices con una matriz de pesos (`W`) y agrega un vector de sesgo (`b`).
+   - Cada fila en el vector de entrada se conecta a cada columna en la matriz de pesos. Si tienes características input_size y quieres características output_size de esta capa (es decir, neuronas output_size conceptuales), la matriz de pesos `W` tendrá una forma de (input_size, output_size). Cada elemento $W_ij$ es el peso conectando la i-ésima característica de entrada a la j-ésima neurona en la capa.
+   - El vector de sesgo b tendrá elementos output_size, uno para cada neurona.
+   - Matemáticamente: $z=entrada×W+b$.
+   - En SmolML, cuando creas una DenseLayer (de `layer.py`), especificas input_size y output_size. La capa luego inicializa self.weights (nuestro `W`) y self.biases (nuestro `b`) como objetos `MLArray`. Estos son los parámetros entrenables de la capa.
 
 ```python
-# From layer.py
+# De layer.py
 class DenseLayer:
     def __init__(self, input_size: int, output_size: int, ...):
         self.weights = weight_initializer.initialize(input_size, output_size) # MLArray
@@ -49,38 +49,38 @@ class DenseLayer:
         ...
 ```
 
-2. **Activation Function**: The result (`z`) of this linear transformation is then passed element-wise through a chosen non-linear activation function (e.g., ReLU, Tanh).
-   - This is applied to the output of each conceptual neuron in the layer.
-   - In SmolML, you specify the activation_function when creating a DenseLayer, and it's applied in the forward method:
+2. **Función de Activación (Activation Function)**: El resultado (`z`) de esta transformación lineal se pasa luego elemento por elemento a través de una función de activación no lineal elegida (ej., ReLU, Tanh).
+   - Esto se aplica a la salida de cada neurona conceptual en la capa.
+   - En SmolML, especificas la activation_function al crear una DenseLayer, y se aplica en el método forward:
 
 ```python
-# From layer.py
+# De layer.py
 class DenseLayer:
     ...
     def forward(self, input_data):
-        z = input_data @ self.weights + self.biases # Linear transformation
-        return self.activation_function(z)      # Activation
+        z = input_data @ self.weights + self.biases # Transformación lineal
+        return self.activation_function(z)      # Activación
 ```
 
-The forward method essentially defines how data flows through the layer. Because `input_data`, `self.weights`, and `self.biases` are `MLArray`s (which use `Value` objects internally), all operations automatically build the computational graph needed for backpropagation.
+El método forward esencialmente define cómo fluyen los datos a través de la capa. Porque `input_data`, `self.weights`, y `self.biases` son `MLArray`s (que usan objetos `Value` internamente), todas las operaciones automáticamente construyen el grafo computacional necesario para retropropagación.
 
-## Neural Networks: Stacking Layers
+## Redes Neuronales: Apilando Capas
 
-The true power of neural networks comes from stacking multiple layers. The output of one layer becomes the input to the next. This allows the network to learn hierarchical features – earlier layers might learn simple patterns (like edges in an image), while later layers combine these to learn more complex concepts (like shapes or objects).
+El verdadero poder de las redes neuronales viene de apilar múltiples capas. La salida de una capa se convierte en la entrada de la siguiente. Esto permite a la red aprender características jerárquicas – capas anteriores podrían aprender patrones simples (como bordes en una imagen), mientras capas posteriores los combinan para aprender conceptos más complejos (como formas u objetos).
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/3979a284-0b29-4110-b6c5-dfe1a13f50b9" width="600">
 </div>
 
-### The NeuralNetwork Class (neural_network.py)
+### La Clase NeuralNetwork (neural_network.py)
 
-In SmolML, the `NeuralNetwork` class manages this sequence of layers and orchestrates the entire training process.
+En SmolML, la clase `NeuralNetwork` maneja esta secuencia de capas y orquesta todo el proceso de entrenamiento.
 
-- **Initialization (__init__)**:
-  - You create a NeuralNetwork by providing it with a list of layer objects (e.g., a sequence of DenseLayer instances), a loss_function (to measure how "wrong" the network's predictions are), and an optimizer (which defines how to update the layer parameters).
+- **Inicialización (__init__)**:
+  - Creas una NeuralNetwork proporcionándole una lista de objetos de capa (ej., una secuencia de instancias DenseLayer), una loss_function (para medir qué tan "incorrectas" están las predicciones de la red), y un optimizer (que define cómo actualizar los parámetros de la capa).
 
 ```python
-# From neural_network.py
+# De neural_network.py
 class NeuralNetwork:
     def __init__(self, layers: list, loss_function: callable, optimizer: optimizers.Optimizer = optimizers.SGD()):
         self.layers = layers
@@ -88,48 +88,48 @@ class NeuralNetwork:
         self.optimizer = optimizer
 ```
 
-- **Forward Pass (forward)**:
-  - The network's forward pass is straightforward: it takes the input data and passes it sequentially through each layer in its list. The output of layer i becomes the input to layer i+1.
+- **Paso Hacia Adelante (Forward Pass) (forward)**:
+  - El paso hacia adelante de la red es directo: toma los datos de entrada y los pasa secuencialmente a través de cada capa en su lista. La salida de la capa i se convierte en la entrada de la capa i+1.
 
 ```python
-# From neural_network.py
+# De neural_network.py
 class NeuralNetwork:
     ...
     def forward(self, input_data):
-        for layer in self.layers: # Pass data through each layer
+        for layer in self.layers: # Pasar datos a través de cada capa
             input_data = layer.forward(input_data)
-        return input_data # Final output of the network
+        return input_data # Salida final de la red
 ```
 
-This chained forward pass, because each layer's forward method uses MLArray operations, builds one large computational graph from the initial input all the way to the network's final prediction.
+Este paso hacia adelante encadenado, porque cada método forward de capa usa operaciones MLArray, construye un gran grafo computacional desde la entrada inicial hasta la predicción final de la red.
 
-## Teaching the Network: The Training Loop
+## Enseñando a la Red: El Loop de Entrenamiento
 
-"Learning" in a neural network means adjusting the weights and biases in all its layers to make better predictions. This is achieved through a process called training, which typically involves the following steps repeated over many epochs (passes through the entire dataset):
+"Aprender" en una red neuronal significa ajustar los pesos y sesgos en todas sus capas para hacer mejores predicciones. Esto se logra a través de un proceso llamado entrenamiento, que típicamente involucra los siguientes pasos repetidos por muchas épocas (pases a través de todo el dataset):
 
-1. **Forward Pass**:
-   - Feed the input data (`X`) through the network using `network.forward(X)` to get predictions (`y_pred`). As we've seen, this also builds the computational graph.
+1. **Paso Hacia Adelante (Forward Pass)**:
+   - Alimentar los datos de entrada (`X`) a través de la red usando `network.forward(X)` para obtener predicciones (`y_pred`). Como hemos visto, esto también construye el grafo computacional.
 
-2. **Compute Loss**:
-   - Compare the network's predictions (`y_pred`) with the actual target values (`y`) using the specified loss_function (e.g., Mean Squared Error for regression, Cross-Entropy for classification).
-   - The loss is a single Value (often wrapped in an `MLArray`) that quantifies how badly the network performed on this batch of data. This loss `Value` is the final node of our current computational graph.
+2. **Calcular Pérdida (Compute Loss)**:
+   - Comparar las predicciones de la red (`y_pred`) con los valores objetivo reales (`y`) usando la loss_function especificada (ej., Error Cuadrático Medio para regresión, Entropía Cruzada para clasificación).
+   - La pérdida es un solo Value (frecuentemente envuelto en un `MLArray`) que cuantifica qué tan mal se desempeñó la red en este lote de datos. Este `Value` de pérdida es el nodo final de nuestro grafo computacional actual.
 
-3. **Backward Pass (Backpropagation)**:
-   - This is where the magic of our `Value` objects (from the 'core' section) shines! We call `loss.backward()`.
-   - This one command triggers the automatic differentiation process. It walks backwards through the entire computational graph (from the loss all the way back to every weight and bias in every `DenseLayer`, and even the input `X`) and calculates the gradient of the loss with respect to each of these `Value` objects. The `.grad` attribute of each `Value` (and thus each element in our `MLArray` parameters) is populated.
-   - This tells us how much a small change in each `weight` or `bias` would affect the overall loss.
+3. **Paso Hacia Atrás (Backward Pass) (Retropropagación)**:
+   - ¡Aquí es donde brilla la magia de nuestros objetos `Value` (de la sección 'core')! Llamamos `loss.backward()`.
+   - Este comando dispara el proceso de diferenciación automática. Camina hacia atrás a través del grafo computacional completo (desde la pérdida hasta cada peso y sesgo en cada `DenseLayer`, e incluso la entrada `X`) y calcula el gradiente de la pérdida con respecto a cada uno de estos objetos `Value`. El atributo `.grad` de cada `Value` (y por tanto cada elemento en nuestros parámetros `MLArray`) se llena.
+   - Esto nos dice cuánto cambiaría un pequeño cambio en cada `weight` o `bias` la pérdida general.
 
-4. **Update Parameters**:
-   - Now that we know the "direction of steepest ascent" for the loss (the gradients), the optimizer steps in. It uses these gradients (and its own internal logic, like a learning rate) to adjust the weights and biases in each layer. The goal is to nudge them in the opposite direction of their gradients to reduce the loss.
-   - In SmolML, the `NeuralNetwork.train` method iterates through its layers and calls `layer.update(self.optimizer, ...)` for each. This method, in turn, uses the optimizer to modify layer.weights and layer.biases.
+4. **Actualizar Parámetros (Update Parameters)**:
+   - Ahora que sabemos la "dirección de mayor ascenso" para la pérdida (los gradientes), el optimizador interviene. Usa estos gradientes (y su propia lógica interna, como una tasa de aprendizaje) para ajustar los pesos y sesgos en cada capa. El objetivo es empujarlos en la dirección opuesta a sus gradientes para reducir la pérdida.
+   - En SmolML, el método `NeuralNetwork.train` itera a través de sus capas y llama `layer.update(self.optimizer, ...)` para cada una. Este método, a su vez, usa el optimizador para modificar layer.weights y layer.biases.
 
-5. **Reset Gradients**:
-   - The gradients calculated by `loss.backward()` are accumulated (added) to the `.grad` attribute of each `Value`. Before the next training iteration (the next forward/backward pass), it's absolutely crucial to reset these gradients back to zero.
-   - This is done using the `.restart()` method on the relevant `MLArray`s (all weights and biases in every layer, and sometimes X and y if they are part of persistent graphs). If we didn't do this, gradients from previous iterations would incorrectly influence the updates in the current iteration.
-   - You'll see this in `NeuralNetwork.train()`:
+5. **Reiniciar Gradientes (Reset Gradients)**:
+   - Los gradientes calculados por `loss.backward()` son acumulados (agregados) al atributo `.grad` de cada `Value`. Antes de la siguiente iteración de entrenamiento (el siguiente paso forward/backward), es absolutamente crucial reiniciar estos gradientes de vuelta a cero.
+   - Esto se hace usando el método `.restart()` en los `MLArray`s relevantes (todos los pesos y sesgos en cada capa, y a veces X e y si son parte de grafos persistentes). Si no hiciéramos esto, los gradientes de iteraciones previas influenciarían incorrectamente las actualizaciones en la iteración actual.
+   - Verás esto en `NeuralNetwork.train()`:
 
 ```python
-# Inside NeuralNetwork.train() after parameter updates
+# Dentro de NeuralNetwork.train() después de actualizaciones de parámetros
 X.restart()
 y.restart()
 for layer in self.layers:
@@ -137,4 +137,4 @@ for layer in self.layers:
     layer.biases.restart()
 ```
 
-By repeatedly cycling through these steps, the NeuralNetwork gradually tunes its DenseLayer parameters, leveraging the automatic differentiation power of Value and MLArray to minimize the loss and "learn" from the data.
+Al repetir cíclicamente estos pasos, la NeuralNetwork gradualmente ajusta sus parámetros DenseLayer, aprovechando el poder de diferenciación automática de Value y MLArray para minimizar la pérdida y "aprender" de los datos.

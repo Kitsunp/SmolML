@@ -1,57 +1,57 @@
-# SmolML - Regression: Predicting Continuous Values
+# SmolML - Regresión: Prediciendo Valores Continuos
 
-Building upon the core concepts of automatic differentiation (`Value`) and N-dimensional arrays (`MLArray`) explained in the SmolML Core, we can now implement various machine learning models. This section focuses on **regression models**, which are used to predict continuous numerical outputs. Think of predicting house prices, stock values, or temperature based on input features.
+Construyendo sobre los conceptos fundamentales de diferenciación automática (`Value`) y arrays N-dimensionales (`MLArray`) explicados en el SmolML Core, ahora podemos implementar varios modelos de machine learning. Esta sección se enfoca en **modelos de regresión (regression models)**, que se usan para predecir salidas numéricas continuas. Piensa en predecir precios de casas, valores de acciones, o temperatura basándose en características de entrada.
 
-While deep neural networks offer immense power, simpler models like Linear Regression or its extension, Polynomial Regression, are often excellent starting points, computationally efficient, and highly interpretable. They share the same fundamental learning principle as complex networks: minimizing a loss function by adjusting parameters using gradient descent, all powered by our automatic differentiation engine using the `Value` class.
+Mientras que las redes neuronales profundas ofrecen poder inmenso, modelos más simples como Regresión Lineal (Linear Regression) o su extensión, Regresión Polinomial (Polynomial Regression), son frecuentemente excelentes puntos de partida, computacionalmente eficientes y altamente interpretables. Comparten el mismo principio fundamental de aprendizaje que las redes complejas: minimizar una función de pérdida (loss function) ajustando parámetros usando descenso de gradiente (gradient descent), todo potenciado por nuestro motor de diferenciación automática usando la clase `Value`.
 
-## Regression Fundamentals: Learning from Data
+## Fundamentos de Regresión: Aprendiendo de los Datos
 
-The goal in regression is to find a mathematical function that maps input features (like the square footage of a house) to a continuous output (like its price). This function has internal parameters (often called **weights** or coefficients, and a **bias** or intercept) that determine its exact shape.
+El objetivo en regresión es encontrar una función matemática que mapee características de entrada (como los pies cuadrados de una casa) a una salida continua (como su precio). Esta función tiene parámetros internos (frecuentemente llamados **pesos (weights)** o coeficientes, y un **sesgo (bias)** o intercepto) que determinan su forma exacta.
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/79874cec-8650-4628-af1f-ca6fdc4debe5" width="600">
 </div>
 
-How do we find the *best* parameters?
-1.  **Prediction:** We start with initial (often random) parameters and use the model to make predictions on our training data.
-2.  **Loss Calculation:** We compare these predictions to the actual known values using a **loss function** (like Mean Squared Error - MSE). This function quantifies *how wrong* the model currently is. A lower loss is better.
-3.  **Gradient Calculation:** Just like in the core explanation, we need to know how to adjust each parameter to reduce the loss. Our `Value` objects and the concept of **backpropagation** automatically calculate the **gradient** of the loss with respect to each parameter (weights and bias). Remember, the gradient points towards the steepest *increase* in loss.
-4.  **Parameter Update:** We use an **optimizer** (like Stochastic Gradient Descent - SGD) to nudge the parameters in the *opposite* direction of their gradients, taking a small step towards lower loss.
-5.  **Iteration:** We repeat steps 1-4 many times (iterations or epochs), gradually improving the model's parameters until the loss is minimized or stops decreasing significantly.
+¿Cómo encontramos los *mejores* parámetros?
+1.  **Predicción:** Empezamos con parámetros iniciales (frecuentemente aleatorios) y usamos el modelo para hacer predicciones en nuestros datos de entrenamiento.
+2.  **Cálculo de Pérdida:** Comparamos estas predicciones con los valores reales conocidos usando una **función de pérdida (loss function)** (como Error Cuadrático Medio - MSE). Esta función cuantifica *qué tan equivocado* está el modelo actualmente. Una pérdida menor es mejor.
+3.  **Cálculo de Gradiente:** Así como en la explicación del core, necesitamos saber cómo ajustar cada parámetro para reducir la pérdida. Nuestros objetos `Value` y el concepto de **retropropagación (backpropagation)** automáticamente calculan el **gradiente** de la pérdida con respecto a cada parámetro (pesos y sesgo). Recuerda, el gradiente apunta hacia el mayor *aumento* de pérdida.
+4.  **Actualización de Parámetros:** Usamos un **optimizador (optimizer)** (como Descenso de Gradiente Estocástico - SGD) para empujar los parámetros en la dirección *opuesta* a sus gradientes, dando un pequeño paso hacia menor pérdida.
+5.  **Iteración:** Repetimos los pasos 1-4 muchas veces (iteraciones o épocas), gradualmente mejorando los parámetros del modelo hasta que la pérdida se minimiza o deja de decrecer significativamente.
 
-This iterative process allows the regression model to "learn" the underlying relationship between the inputs and outputs from the data.
+Este proceso iterativo permite al modelo de regresión "aprender" la relación subyacente entre las entradas y salidas de los datos.
 
-## The `Regression` Base Class: A Common Framework
+## La Clase Base `Regression`: Un Framework Común
 
-To streamline the implementation of different regression algorithms, in SmolML we made a `Regression` base class (in `regression.py`). This class handles the common structure and the training loop logic. Specific models like `LinearRegression` inherit from it.
+Para optimizar la implementación de diferentes algoritmos de regresión, en SmolML hicimos una clase base `Regression` (en `regression.py`). Esta clase maneja la estructura común y la lógica del loop de entrenamiento. Modelos específicos como `LinearRegression` heredan de ella.
 
-Here's how it works:
+Así es como funciona:
 
-* **Initialization (`__init__`)**:
-    * Accepts the `input_size` (number of expected input features), a `loss_function`, an `optimizer` instance, and a weight `initializer`.
-    * Crucially, it initializes the model's **trainable parameters**:
-        * `self.weights`: An `MLArray` holding the coefficients for each input feature. Its shape is determined by `input_size`, and values are set by the `initializer`.
-        * `self.bias`: A scalar `MLArray` (initialized to 1) representing the intercept term.
-    * Because `weights` and `bias` are `MLArray`s, they inherently contain `Value` objects. This ensures they are part of the computational graph and their gradients can be automatically computed during training.
+* **Inicialización (`__init__`)**:
+    * Acepta el `input_size` (número de características de entrada esperadas), una `loss_function`, una instancia de `optimizer`, y un `initializer` de pesos.
+    * Crucialmente, inicializa los **parámetros entrenables** del modelo:
+        * `self.weights`: Un `MLArray` que contiene los coeficientes para cada característica de entrada. Su forma está determinada por `input_size`, y los valores son establecidos por el `initializer`.
+        * `self.bias`: Un `MLArray` escalar (inicializado a 1) representando el término de intercepto.
+    * Porque `weights` y `bias` son `MLArray`s, inherentemente contienen objetos `Value`. Esto asegura que sean parte del grafo computacional y sus gradientes puedan ser automáticamente calculados durante el entrenamiento.
 
-* **Training (`fit`)**:
-    * This method orchestrates the gradient descent loop described earlier. For a specified number of `iterations`:
-        1.  **Forward Pass:** Calls `self.predict(X)` (which must be implemented by the subclass) to get predictions `y_pred`. This builds the computational graph for the prediction step.
-        2.  **Loss Calculation:** Computes `loss = self.loss_function(y, y_pred)`. This `loss` is the final `MLArray` (usually containing a single `Value`) representing the overall error for this iteration.
-        3.  **Backward Pass:** Invokes `loss.backward()`. This triggers the automatic differentiation process, calculating the gradients of the loss with respect to all involved `Value` objects, including those within `self.weights` and `self.bias`.
-        4.  **Parameter Update:** Uses `self.optimizer.update(...)` to adjust `self.weights` and `self.bias` based on their computed gradients (`weights.grad()` and `bias.grad()`) and the optimizer's logic (e.g., learning rate).
-        5.  **Gradient Reset:** Calls `self.restart(X, y)` to zero out all gradients (`.grad` attributes of the `Value` objects) in the parameters and data, preparing for the next iteration.
+* **Entrenamiento (`fit`)**:
+    * Este método orquesta el loop de descenso de gradiente descrito anteriormente. Para un número especificado de `iterations`:
+        1.  **Paso Hacia Adelante (Forward Pass):** Llama `self.predict(X)` (que debe ser implementado por la subclase) para obtener predicciones `y_pred`. Esto construye el grafo computacional para el paso de predicción.
+        2.  **Cálculo de Pérdida:** Calcula `loss = self.loss_function(y, y_pred)`. Esta `loss` es el `MLArray` final (usualmente conteniendo un solo `Value`) representando el error general para esta iteración.
+        3.  **Paso Hacia Atrás (Backward Pass):** Invoca `loss.backward()`. Esto dispara el proceso de diferenciación automática, calculando los gradientes de la pérdida con respecto a todos los objetos `Value` involucrados, incluyendo aquellos dentro de `self.weights` y `self.bias`.
+        4.  **Actualización de Parámetros:** Usa `self.optimizer.update(...)` para ajustar `self.weights` y `self.bias` basándose en sus gradientes calculados (`weights.grad()` y `bias.grad()`) y la lógica del optimizador (ej., tasa de aprendizaje).
+        5.  **Reinicio de Gradientes:** Llama `self.restart(X, y)` para poner a cero todos los gradientes (atributos `.grad` de los objetos `Value`) en los parámetros y datos, preparando para la siguiente iteración.
 
-* **Prediction (`predict`)**:
-    * Defined in the base class but raises `NotImplementedError`. Why? Because the core logic of *how* to make a prediction differs between regression types (e.g., linear vs. polynomial). Each subclass *must* provide its own `predict` method defining its specific mathematical formula using `MLArray` operations.
+* **Predicción (`predict`)**:
+    * Definido en la clase base pero lanza `NotImplementedError`. ¿Por qué? Porque la lógica central de *cómo* hacer una predicción difiere entre tipos de regresión (ej., lineal vs. polinomial). Cada subclase *debe* proporcionar su propio método `predict` definiendo su fórmula matemática específica usando operaciones `MLArray`.
 
-* **Gradient Reset (`restart`)**:
-    * A helper that simply calls the `.restart()` method on the `weights`, `bias`, input `X`, and target `y` `MLArray`s. This efficiently resets the `.grad` attribute of all underlying `Value` objects to zero.
+* **Reinicio de Gradientes (`restart`)**:
+    * Un auxiliar que simplemente llama el método `.restart()` en los `MLArray`s de `weights`, `bias`, entrada `X`, y objetivo `y`. Esto eficientemente reinicia el atributo `.grad` de todos los objetos `Value` subyacentes a cero.
 
-* **Representation (`__repr__`)**:
-    * Provides a nicely formatted string summary of the configured model, including its type, parameter shapes, optimizer, loss function, and estimated memory usage.
+* **Representación (`__repr__`)**:
+    * Proporciona un resumen en cadena bien formateado del modelo configurado, incluyendo su tipo, formas de parámetros, optimizador, función de pérdida y uso estimado de memoria.
 
-## Specific Models Implemented
+## Modelos Específicos Implementados
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/8b282ca1-7c17-460d-a64c-61b0624627f9" width="600">
@@ -59,41 +59,41 @@ Here's how it works:
 
 ### `LinearRegression`
 
-This is the most fundamental regression model. It assumes a direct linear relationship between the input features `X` and the output `y`. The goal is to find the best weights `w` and bias `b` such that $y \approx Xw + b$.
+Este es el modelo de regresión más fundamental. Asume una relación lineal directa entre las características de entrada `X` y la salida `y`. El objetivo es encontrar los mejores pesos `w` y sesgo `b` tal que $y \approx Xw + b$.
 
-* **Implementation (`regression.py`)**:
-    * Inherits directly from `Regression`.
-    * Its primary contribution is overriding the `predict` method.
-* **Prediction (`predict`)**:
-    * Implements the linear equation: `return X @ self.weights + self.bias`.
-    * It takes the input `X` (`MLArray`), performs matrix multiplication (`@`) with `self.weights` (`MLArray`), and adds `self.bias` (`MLArray`). Because `X`, `weights`, and `bias` are all `MLArray`s containing `Value` objects, this single line of code automatically constructs the necessary computational graph for backpropagation.
-* **Training**:
-    * Uses the `fit` method directly inherited from the `Regression` base class without modification. The base class handles the entire training loop using the `predict` logic provided by `LinearRegression`.
+* **Implementación (`regression.py`)**:
+    * Hereda directamente de `Regression`.
+    * Su contribución principal es sobrescribir el método `predict`.
+* **Predicción (`predict`)**:
+    * Implementa la ecuación lineal: `return X @ self.weights + self.bias`.
+    * Toma la entrada `X` (`MLArray`), realiza multiplicación de matrices (`@`) con `self.weights` (`MLArray`), y suma `self.bias` (`MLArray`). Porque `X`, `weights`, y `bias` son todos `MLArray`s conteniendo objetos `Value`, esta línea de código automáticamente construye el grafo computacional necesario para retropropagación.
+* **Entrenamiento**:
+    * Usa el método `fit` heredado directamente de la clase base `Regression` sin modificación. La clase base maneja todo el loop de entrenamiento usando la lógica `predict` proporcionada por `LinearRegression`.
 
 ### `PolynomialRegression`
 
-What if the relationship isn't a straight line? Polynomial Regression extends linear regression by fitting a polynomial curve (e.g., $y \approx w_2 x^2 + w_1 x + b$) to the data.
+¿Qué pasa si la relación no es una línea recta? Regresión Polinomial extiende regresión lineal ajustando una curva polinomial (ej., $y \approx w_2 x^2 + w_1 x + b$) a los datos.
 
-* **Implementation (`regression.py`)**:
-    * Also inherits from `Regression`.
-* **The Core Idea**: Instead of directly fitting `X` to `y`, it first *transforms* the input features `X` into polynomial features (e.g., adding $X^2$, $X^3$, etc.) and then applies a standard *linear regression* model to these *new, transformed* features.
-* **Initialization (`__init__`)**:
-    * Takes an additional `degree` argument, specifying the highest power to include in the feature transformation (e.g., `degree=2` means include $X$ and $X^2$).
-    * It calls the base class `__init__`, but the `input_size` passed to the base class is effectively the number of *polynomial features*, not the original number of features. The weights will correspond to these transformed features.
-* **Feature Transformation (`transform_features`)**:
-    * This crucial method takes the original input `X` and generates the new polynomial features. For an input `X` and `degree=d`, it calculates $X, X^2, \dots, X^d$ using `MLArray` operations (like element-wise multiplication `*`) and concatenates them into a new `MLArray`. This ensures the transformation is also potentially part of the graph if needed (though often it's pre-calculated).
-* **Prediction (`predict`)**:
-    1.  It first calls `X_poly = self.transform_features(X)` to get the polynomial features.
-    2.  Then, it performs a standard linear prediction using these transformed features: `return X_poly @ self.weights + self.bias`. The `self.weights` here correspond to the coefficients of the polynomial terms.
-* **Training (`fit`)**:
-    * It overrides the base `fit` method slightly.
-    1.  Before the main loop, it transforms the entire training input `X` into `X_poly = self.transform_features(X)`.
-    2.  It then calls the *base class's* `fit` method (`super().fit(...)`) but passes `X_poly` (instead of `X`) as the input data.
-    * The inherited `fit` method then proceeds as usual, calculating loss based on the predictions from `X_poly`, backpropagating gradients through the linear prediction part *and* the feature transformation step, and updating the weights associated with the polynomial terms.
+* **Implementación (`regression.py`)**:
+    * También hereda de `Regression`.
+* **La Idea Central**: En lugar de ajustar directamente `X` a `y`, primero *transforma* las características de entrada `X` en características polinomiales (ej., agregando $X^2$, $X^3$, etc.) y luego aplica un modelo de *regresión lineal* estándar a estas *nuevas características transformadas*.
+* **Inicialización (`__init__`)**:
+    * Toma un argumento adicional `degree`, especificando la potencia más alta a incluir en la transformación de características (ej., `degree=2` significa incluir $X$ y $X^2$).
+    * Llama el `__init__` de la clase base, pero el `input_size` pasado a la clase base es efectivamente el número de *características polinomiales*, no el número original de características. Los pesos corresponderán a estas características transformadas.
+* **Transformación de Características (`transform_features`)**:
+    * Este método crucial toma la entrada original `X` y genera las nuevas características polinomiales. Para una entrada `X` y `degree=d`, calcula $X, X^2, \dots, X^d$ usando operaciones `MLArray` (como multiplicación elemento por elemento `*`) y las concatena en un nuevo `MLArray`. Esto asegura que la transformación también sea potencialmente parte del grafo si es necesario (aunque frecuentemente se pre-calcula).
+* **Predicción (`predict`)**:
+    1.  Primero llama `X_poly = self.transform_features(X)` para obtener las características polinomiales.
+    2.  Luego, realiza una predicción lineal estándar usando estas características transformadas: `return X_poly @ self.weights + self.bias`. Los `self.weights` aquí corresponden a los coeficientes de los términos polinomiales.
+* **Entrenamiento (`fit`)**:
+    * Sobrescribe ligeramente el método `fit` de la clase base.
+    1.  Antes del loop principal, transforma toda la entrada de entrenamiento `X` en `X_poly = self.transform_features(X)`.
+    2.  Luego llama el método `fit` de la *clase base* (`super().fit(...)`) pero pasa `X_poly` (en lugar de `X`) como los datos de entrada.
+    * El método `fit` heredado luego procede como de costumbre, calculando pérdida basándose en las predicciones de `X_poly`, retropropagando gradientes a través de la parte de predicción lineal *y* el paso de transformación de características, y actualizando los pesos asociados con los términos polinomiales.
 
-## Example Usage
+## Ejemplo de Uso
 
-Here's a conceptual example of how you might use `LinearRegression`:
+Aquí hay un ejemplo conceptual de cómo podrías usar `LinearRegression`:
 
 ```python
 from smolml.models.regression import LinearRegression
@@ -101,38 +101,38 @@ from smolml.core.ml_array import MLArray
 import smolml.utils.optimizers as optimizers
 import smolml.utils.losses as losses
 
-# Sample Data (e.g., 2 features, 3 samples)
+# Datos de Muestra (ej., 2 características, 3 muestras)
 X_data = [[1.0, 2.0], [2.0, 3.0], [3.0, 4.0]]
-# Target values (continuous)
+# Valores objetivo (continuos)
 y_data = [[3.5], [5.5], [7.5]]
 
-# Convert to MLArray
+# Convertir a MLArray
 X = MLArray(X_data)
 y = MLArray(y_data)
 
-# Initialize the model
-# Expects 2 input features
+# Inicializar el modelo
+# Espera 2 características de entrada
 model = LinearRegression(input_size=2,
                          optimizer=optimizers.SGD(learning_rate=0.01),
                          loss_function=losses.mse_loss)
 
-# Print initial model summary
+# Imprimir resumen inicial del modelo
 print(model)
 
-# Train the model
-print("\nStarting training...")
+# Entrenar el modelo
+print("\nIniciando entrenamiento...")
 losses_history = model.fit(X, y, iterations=100, verbose=True, print_every=10)
-print("Training complete.")
+print("Entrenamiento completo.")
 
-# Print final model summary (weights/bias will have changed)
+# Imprimir resumen final del modelo (pesos/sesgo habrán cambiado)
 print(model)
 
-# Make predictions on new data
+# Hacer predicciones en nuevos datos
 X_new = MLArray([[4.0, 5.0]])
 prediction = model.predict(X_new)
-print(f"\nPrediction for {X_new.to_list()}: {prediction.to_list()}")
+print(f"\nPredicción para {X_new.to_list()}: {prediction.to_list()}")
 ```
 
-## Regression wrap-up
+## Resumen de Regresión
 
-These regression classes showcase how the foundational `Value` and `MLArray` we implemented can be used to design and train classic machine learning models! In just a few lines of code! Isn't that cool?
+¡Estas clases de regresión muestran cómo el `Value` y `MLArray` fundamentales que implementamos pueden usarse para diseñar y entrenar modelos clásicos de machine learning! ¡En solo unas pocas líneas de código! ¿No es genial?

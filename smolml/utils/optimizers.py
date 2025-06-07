@@ -1,23 +1,23 @@
 from smolml.core.ml_array import zeros
 
 class Optimizer:
-    """Base optimizer class that defines the interface for all optimizers"""
+    """Clase base de optimizador que define la interfaz para todos los optimizadores"""
     def __init__(self, learning_rate: float = 0.01):
         self.learning_rate = learning_rate
     
     def update(self, object, object_idx, param_names):
-        """Update rule to be implemented by specific optimizers"""
+        """Regla de actualización a ser implementada por optimizadores específicos"""
         raise NotImplementedError
 
 class SGD(Optimizer):
-    """Standard Stochastic Gradient Descent optimizer"""
+    """Optimizador estándar de Descenso de Gradiente Estocástico"""
     def update(self, object, object_idx, param_names):
         """
-        Update rule for standard SGD: θ = θ - α∇θ
-        where α is the learning rate.
+        Regla de actualización para SGD estándar: θ = θ - α∇θ
+        donde α es la tasa de aprendizaje.
         
-        This is the most basic form of gradient descent, which directly updates
-        parameters in the opposite direction of the gradient, scaled by the learning rate.
+        Esta es la forma más básica de descenso de gradiente, que actualiza directamente
+        los parámetros en la dirección opuesta al gradiente, escalada por la tasa de aprendizaje.
         """
         new_params = tuple(
             getattr(object, name) - self.learning_rate * getattr(object, name).grad()
@@ -27,9 +27,9 @@ class SGD(Optimizer):
 
 class SGDMomentum(Optimizer):
     """
-    Stochastic Gradient Descent optimizer with momentum.
-    This optimizer accelerates SGD by accumulating a velocity vector in the direction of persistent gradients,
-    helping to avoid local minima and speed up convergence.
+    Optimizador de Descenso de Gradiente Estocástico con momentum.
+    Este optimizador acelera SGD acumulando un vector de velocidad en la dirección de gradientes persistentes,
+    ayudando a evitar mínimos locales y acelerar la convergencia.
     """
     def __init__(self, learning_rate: float = 0.01, momentum_coefficient: float = 0.9):
         super().__init__(learning_rate)
@@ -38,10 +38,10 @@ class SGDMomentum(Optimizer):
         
     def update(self, object, object_idx, param_names):
         """
-        Update rule for SGD with momentum: v = βv + α∇θ, θ = θ - v
-        where β is the momentum coefficient and α is the learning rate.
+        Regla de actualización para SGD con momentum: v = βv + α∇θ, θ = θ - v
+        donde β es el coeficiente de momentum y α es la tasa de aprendizaje.
         """
-        # Initialize velocities for this layer if not exist
+        # Inicializar velocidades para esta capa si no existen
         if object_idx not in self.velocities:
             self.velocities[object_idx] = {
                 name: zeros(*getattr(object, name).shape) for name in param_names
@@ -49,21 +49,21 @@ class SGDMomentum(Optimizer):
         
         new_params = []
         for name in param_names:
-            # Update velocity
+            # Actualizar velocidad
             v = self.velocities[object_idx][name]
             v = self.momentum_coefficient * v + self.learning_rate * getattr(object, name).grad()
             self.velocities[object_idx][name] = v
             
-            # Compute new parameter
+            # Calcular nuevo parámetro
             new_params.append(getattr(object, name) - v)
         
         return tuple(new_params)
 
 class AdaGrad(Optimizer):
     """
-    Adaptive Gradient optimizer.
-    Adapts the learning rate to parameters, performing smaller updates 
-    for frequently updated parameters and larger updates for infrequent ones.
+    Optimizador de Gradiente Adaptativo.
+    Adapta la tasa de aprendizaje a los parámetros, realizando actualizaciones más pequeñas 
+    para parámetros actualizados frecuentemente y actualizaciones más grandes para los infrecuentes.
     """
     def __init__(self, learning_rate: float = 0.01):
         super().__init__(learning_rate)
@@ -72,10 +72,10 @@ class AdaGrad(Optimizer):
         
     def update(self, object, object_idx, param_names):
         """
-        Update rule for AdaGrad: θ = θ - (α / √(G + ε)) * ∇θ
-        where G is the sum of squared gradients up to the current timestep
+        Regla de actualización para AdaGrad: θ = θ - (α / √(G + ε)) * ∇θ
+        donde G es la suma de gradientes cuadrados hasta el paso temporal actual
         """
-        # Initialize squared gradients for this layer if not exist
+        # Inicializar gradientes cuadrados para esta capa si no existen
         if object_idx not in self.squared_gradients:
             self.squared_gradients[object_idx] = {
                 name: zeros(*getattr(object, name).shape) for name in param_names
@@ -83,10 +83,10 @@ class AdaGrad(Optimizer):
         
         new_params = []
         for name in param_names:
-            # Update squared gradients sum
+            # Actualizar suma de gradientes cuadrados
             self.squared_gradients[object_idx][name] += getattr(object, name).grad()**2
             
-            # Compute new parameter
+            # Calcular nuevo parámetro
             new_params.append(
                 getattr(object, name) - (self.learning_rate / 
                 (self.squared_gradients[object_idx][name] + self.epsilon).sqrt()) * 
@@ -97,11 +97,11 @@ class AdaGrad(Optimizer):
 
 class Adam(Optimizer):
     """
-    Adam (Adaptive Moment Estimation) optimizer.
-    Combines the benefits of:
-    1. Momentum: By keeping track of exponentially decaying gradient average
-    2. RMSprop: By keeping track of exponentially decaying squared gradients
-    Also includes bias correction terms to handle initialization.
+    Optimizador Adam (Estimación de Momento Adaptativo).
+    Combina los beneficios de:
+    1. Momentum: Manteniendo registro del promedio de gradientes con decaimiento exponencial
+    2. RMSprop: Manteniendo registro de gradientes cuadrados con decaimiento exponencial
+    También incluye términos de corrección de sesgo para manejar la inicialización.
     """
     def __init__(self, learning_rate: float = 0.01, exp_decay_gradients: float = 0.9, exp_decay_squared: float = 0.999):
         super().__init__(learning_rate)
@@ -114,12 +114,12 @@ class Adam(Optimizer):
         
     def update(self, object, object_idx, param_names):
         """
-        Update rule for Adam: θ = θ - α * m̂ / (√v̂ + ε)
-        where:
-        - m̂ is the bias-corrected first moment estimate
-        - v̂ is the bias-corrected second moment estimate
+        Regla de actualización para Adam: θ = θ - α * m̂ / (√v̂ + ε)
+        donde:
+        - m̂ es la estimación del primer momento corregida por sesgo
+        - v̂ es la estimación del segundo momento corregida por sesgo
         """
-        # Initialize momentums if not exist
+        # Inicializar momentums si no existen
         if object_idx not in self.gradients_momentum:
             self.gradients_momentum[object_idx] = {
                 name: zeros(*getattr(object, name).shape) for name in param_names
@@ -130,23 +130,23 @@ class Adam(Optimizer):
         
         new_params = []
         for name in param_names:
-            # Update biased first moment estimate
+            # Actualizar estimación sesgada del primer momento
             self.gradients_momentum[object_idx][name] = (
                 self.exp_decay_gradients * self.gradients_momentum[object_idx][name] + 
                 (1 - self.exp_decay_gradients) * getattr(object, name).grad()
             )
             
-            # Update biased second moment estimate
+            # Actualizar estimación sesgada del segundo momento
             self.squared_gradients_momentum[object_idx][name] = (
                 self.exp_decay_squared * self.squared_gradients_momentum[object_idx][name] + 
                 (1 - self.exp_decay_squared) * getattr(object, name).grad()**2
             )
             
-            # Compute bias-corrected moments
+            # Calcular momentos corregidos por sesgo
             m = self.gradients_momentum[object_idx][name] / (1 - self.exp_decay_gradients ** self.timestep)
             v = self.squared_gradients_momentum[object_idx][name] / (1 - self.exp_decay_squared ** self.timestep)
             
-            # Compute new parameter
+            # Calcular nuevo parámetro
             new_params.append(
                 getattr(object, name) - self.learning_rate * m / (v.sqrt() + self.epsilon)
             )

@@ -1,15 +1,15 @@
 """
 ///////////////
-/// MEMORY ///
+/// MEMORIA ///
 ///////////////
 
-Utilities for calculating memory usage of different model types and data structures.
+Utilidades para calcular uso de memoria de diferentes tipos de modelos y estructuras de datos.
 """
 
 import sys
 from typing import Dict, Any, Union, TYPE_CHECKING
 
-# Type hints only, no actual imports
+# Sugerencias de tipo únicamente, sin imports reales
 if TYPE_CHECKING:
     from smolml.core.value import Value
     from smolml.core.ml_array import MLArray
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from smolml.models.tree.random_forest import RandomForest
 
 def format_size(size_bytes):
-    """Helper function to format size in bytes to human readable format"""
+    """Función auxiliar para formatear tamaño en bytes a formato legible por humanos"""
     for unit in ['B', 'KB', 'MB', 'GB']:
         if size_bytes < 1024:
             return f"{size_bytes:.2f} {unit}"
@@ -27,7 +27,7 @@ def format_size(size_bytes):
     return f"{size_bytes:.2f} TB"
 
 def calculate_value_size(value: 'Value') -> int:
-    """Calculate memory footprint of a Value object."""
+    """Calcula la huella de memoria de un objeto Value."""
     total = sys.getsizeof(value)
     total += sys.getsizeof(value.data)  # float
     total += sys.getsizeof(value.grad)  # float
@@ -37,8 +37,8 @@ def calculate_value_size(value: 'Value') -> int:
     return total
 
 def calculate_mlarray_size(arr: 'MLArray') -> int:
-    """Calculate memory footprint of an MLArray object."""
-    # Import Value here to avoid circular dependency
+    """Calcula la huella de memoria de un objeto MLArray."""
+    # Importar Value aquí para evitar dependencia circular
     from smolml.core.value import Value
     
     def get_nested_size(data):
@@ -54,18 +54,18 @@ def calculate_mlarray_size(arr: 'MLArray') -> int:
     return sys.getsizeof(arr) + get_nested_size(arr.data)
 
 def calculate_decision_node_size(node: 'DecisionNode') -> Dict[str, Any]:
-    """Calculate memory footprint of a DecisionNode and its subtree."""
+    """Calcula la huella de memoria de un DecisionNode y su subárbol."""
     size_info = {
         'total': 0,
         'node_size': 0,
         'children': {'left': 0, 'right': 0},
-        'node_type': 'leaf' if node.value is not None else 'internal'
+        'node_type': 'hoja' if node.value is not None else 'interno'
     }
     
-    # Base node size
+    # Tamaño base del nodo
     size_info['node_size'] += sys.getsizeof(node)
     
-    # Add size of attributes
+    # Agregar tamaño de atributos
     if node.feature_idx is not None:
         size_info['node_size'] += sys.getsizeof(node.feature_idx)
     if node.threshold is not None:
@@ -73,7 +73,7 @@ def calculate_decision_node_size(node: 'DecisionNode') -> Dict[str, Any]:
     if node.value is not None:
         size_info['node_size'] += sys.getsizeof(node.value)
     
-    # Recursively calculate children sizes
+    # Calcular recursivamente tamaños de hijos
     if node.left:
         left_size = calculate_decision_node_size(node.left)
         size_info['children']['left'] = left_size['total']
@@ -88,7 +88,7 @@ def calculate_decision_node_size(node: 'DecisionNode') -> Dict[str, Any]:
     return size_info
 
 def calculate_regression_size(model: 'Regression') -> Dict[str, Any]:
-    """Calculate memory footprint of a regression model."""
+    """Calcula la huella de memoria de un modelo de regresión."""
     size_info = {
         'total': 0,
         'parameters': {
@@ -101,13 +101,13 @@ def calculate_regression_size(model: 'Regression') -> Dict[str, Any]:
         }
     }
     
-    # Calculate parameter sizes
+    # Calcular tamaños de parámetros
     params_total = (size_info['parameters']['weights_size'] + 
                    size_info['parameters']['bias_size'])
     size_info['parameters']['total'] = params_total
     size_info['total'] += params_total
     
-    # Add optimizer state size if it exists
+    # Agregar tamaño de estado del optimizador si existe
     if hasattr(model.optimizer, '_state'):
         for key, value in model.optimizer._state.items():
             if isinstance(value, dict):
@@ -117,7 +117,7 @@ def calculate_regression_size(model: 'Regression') -> Dict[str, Any]:
             size_info['optimizer']['state'][key] = state_size
             size_info['total'] += state_size
     
-    # Add base object sizes
+    # Agregar tamaños de objetos base
     size_info['total'] += (
         sys.getsizeof(model) +
         sys.getsizeof(model.loss_function) +
@@ -127,7 +127,7 @@ def calculate_regression_size(model: 'Regression') -> Dict[str, Any]:
     return size_info
 
 def calculate_neural_network_size(model: 'NeuralNetwork') -> Dict[str, Any]:
-    """Calculate memory footprint of a neural network."""
+    """Calcula la huella de memoria de una red neuronal."""
     size_info = {
         'total': 0,
         'layers': [],
@@ -137,7 +137,7 @@ def calculate_neural_network_size(model: 'NeuralNetwork') -> Dict[str, Any]:
         }
     }
     
-    # Calculate size of each layer
+    # Calcular tamaño de cada capa
     for layer in model.layers:
         layer_info = {
             'weights_size': calculate_mlarray_size(layer.weights),
@@ -147,7 +147,7 @@ def calculate_neural_network_size(model: 'NeuralNetwork') -> Dict[str, Any]:
         size_info['layers'].append(layer_info)
         size_info['total'] += layer_info['total']
     
-    # Add optimizer state
+    # Agregar estado del optimizador
     if hasattr(model.optimizer, '_state'):
         for key, value in model.optimizer._state.items():
             if isinstance(value, dict):
@@ -157,7 +157,7 @@ def calculate_neural_network_size(model: 'NeuralNetwork') -> Dict[str, Any]:
             size_info['optimizer']['state'][key] = state_size
             size_info['total'] += state_size
     
-    # Add base object sizes
+    # Agregar tamaños de objetos base
     size_info['total'] += (
         sys.getsizeof(model) +
         sys.getsizeof(model.layers) +
@@ -168,7 +168,7 @@ def calculate_neural_network_size(model: 'NeuralNetwork') -> Dict[str, Any]:
     return size_info
 
 def calculate_decision_tree_size(model: 'DecisionTree') -> Dict[str, Any]:
-    """Calculate memory footprint of a decision tree."""
+    """Calcula la huella de memoria de un árbol de decisión."""
     size_info = {
         'total': 0,
         'base_size': 0,
@@ -180,7 +180,7 @@ def calculate_decision_tree_size(model: 'DecisionTree') -> Dict[str, Any]:
         }
     }
     
-    # Calculate base tree object size
+    # Calcular tamaño del objeto árbol base
     size_info['base_size'] = (
         sys.getsizeof(model) +
         sys.getsizeof(model.max_depth) +
@@ -189,7 +189,7 @@ def calculate_decision_tree_size(model: 'DecisionTree') -> Dict[str, Any]:
         sys.getsizeof(model.task)
     )
     
-    # Calculate tree structure size if tree is trained
+    # Calcular tamaño de estructura del árbol si está entrenado
     if model.root:
         root_size = calculate_decision_node_size(model.root)
         size_info['tree_structure'].update(_analyze_tree_structure(model.root))
@@ -199,7 +199,7 @@ def calculate_decision_tree_size(model: 'DecisionTree') -> Dict[str, Any]:
     return size_info
 
 def _analyze_tree_structure(node: 'DecisionNode', depth: int = 0) -> Dict[str, int]:
-    """Helper function to analyze tree structure."""
+    """Función auxiliar para analizar estructura del árbol."""
     if node is None:
         return {'internal_nodes': 0, 'leaf_nodes': 0, 'max_depth': depth}
     
@@ -221,7 +221,7 @@ def _analyze_tree_structure(node: 'DecisionNode', depth: int = 0) -> Dict[str, i
     }
 
 def calculate_random_forest_size(model: 'RandomForest') -> Dict[str, Any]:
-    """Calculate memory footprint of a random forest."""
+    """Calcula la huella de memoria de un bosque aleatorio."""
     import sys
     from smolml.utils.memory import calculate_decision_tree_size
     
@@ -240,7 +240,7 @@ def calculate_random_forest_size(model: 'RandomForest') -> Dict[str, Any]:
         }
     }
     
-    # Calculate base forest object size
+    # Calcular tamaño del objeto bosque base
     size_info['base_size'] = (
         sys.getsizeof(model) +
         sys.getsizeof(model.n_trees) +
@@ -250,7 +250,7 @@ def calculate_random_forest_size(model: 'RandomForest') -> Dict[str, Any]:
         sys.getsizeof(model.trees)
     )
     
-    # Calculate size of each tree
+    # Calcular tamaño de cada árbol
     if model.trees:
         total_depth = 0
         total_nodes = 0
@@ -260,12 +260,12 @@ def calculate_random_forest_size(model: 'RandomForest') -> Dict[str, Any]:
             size_info['trees']['individual'].append(tree_size)
             size_info['trees']['total'] += tree_size['total']
             
-            # Collect statistics
+            # Recopilar estadísticas
             total_depth += tree_size['tree_structure']['max_depth']
             total_nodes += (tree_size['tree_structure']['internal_nodes'] + 
                           tree_size['tree_structure']['leaf_nodes'])
         
-        # Calculate averages
+        # Calcular promedios
         size_info['forest_stats']['avg_tree_depth'] = total_depth / len(model.trees)
         size_info['forest_stats']['avg_tree_nodes'] = total_nodes / len(model.trees)
     
