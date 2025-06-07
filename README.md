@@ -100,9 +100,27 @@ pip install -r requirements.txt
 
 ¡Las contribuciones siempre son bienvenidas! Si estás interesado en contribuir a SmolML, por favor haz fork del repositorio y crea una nueva rama para tus cambios. Cuando termines con tus cambios, envía un pull request para fusionar tus cambios en la rama principal.
 
+## Traducción al Español
+
+Esta traducción completa al español fue realizada por **[@Kyokopom](https://x.com/Kyokopom)** con el objetivo de hacer el machine learning más accesible para la comunidad hispanohablante. La traducción mantiene:
+
+- ✅ **Terminología técnica consistente** en español
+- ✅ **Valor educativo completo** del proyecto original  
+- ✅ **Funcionalidad 100% preservada** en todo el código
+- ✅ **Documentación bilingüe** con referencias al inglés cuando es útil
+
+¡Esperamos que esta versión en español ayude a más personas a aprender machine learning desde cero!
+
 ## Apoyando SmolML
 
 Si quieres apoyar SmolML, puedes:
 - **Dar una estrella** :star: ¡al proyecto en Github!
 - **Donar** :coin: a mi página de [Ko-fi](https://ko-fi.com/rodmarkun)!
 - **Compartir** :heart: ¡el proyecto con tus amigos!
+
+### Apoyando la Traducción
+
+Si esta traducción al español te ha sido útil, también puedes:
+- **Seguir** a [@Kyokopom](https://x.com/Kyokopom) en X/Twitter
+- **Compartir** la versión en español con la comunidad hispanohablante
+- **Contribuir** mejorando la traducción si encuentras algo que se pueda perfeccionar
