@@ -8,6 +8,18 @@
 
 ---
 
+## 📝 Sobre esta Traducción
+
+Esta es la **versión en español** de SmolML, traducida para hacer el aprendizaje de machine learning accesible a la comunidad hispanohablante.
+
+- **🌍 Repositorio Original (Inglés):** https://github.com/rodmarkun/SmolML
+- **🌟 Repositorio Traducido (Español):** https://github.com/Kitsunp/SmolML/tree/main
+- **👨‍💻 Traducción realizada por:** [@Kyokopom](https://x.com/Kyokopom)
+
+La traducción mantiene toda la funcionalidad original mientras proporciona documentación educativa clara en español, preservando el valor pedagógico del proyecto.
+
+---
+
 ## ¿Qué es SmolML? 🤔
 
 ¿Alguna vez te has preguntado qué sucede *dentro* de esas poderosas librerías de machine learning como Scikit-learn, PyTorch o TensorFlow? ¿Cómo *realmente* aprende una red neuronal? ¿Cómo se implementa el descenso de gradiente?
@@ -20,13 +32,13 @@ El objetivo no es competir con las librerías de producción en velocidad o cara
 
 Puedes leer estas guías de las diferentes secciones de SmolML en cualquier orden, aunque esta lista presenta el orden recomendado para el aprendizaje.
 
-- [SmolML - Core: Diferenciación Automática y Arrays N-Dimensionales](https://github.com/rodmarkun/SmolML/tree/main/smolml/core)
-- [SmolML - Regresión: Prediciendo Valores Continuos](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/regression)
-- [SmolML - Redes Neuronales: Retropropagación al límite](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/nn)
-- [SmolML - Modelos de Árboles: ¡Decisiones, Decisiones!](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/tree)
-- [SmolML - K-Means: ¡Encontrando Grupos en tus Datos!](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/unsupervised)
-- [SmolML - Preprocesamiento: Haz que tus datos sean significativos](https://github.com/rodmarkun/SmolML/tree/main/smolml/preprocessing)
-- [SmolML - ¡El cuarto de utilidades!](https://github.com/rodmarkun/SmolML/tree/main/smolml/utils)
+- [SmolML - Core: Diferenciación Automática y Arrays N-Dimensionales](https://github.com/Kitsunp/SmolML/tree/main/smolml/core)
+- [SmolML - Regresión: Prediciendo Valores Continuos](https://github.com/Kitsunp/SmolML/tree/main/smolml/models/regression)
+- [SmolML - Redes Neuronales: Retropropagación al límite](https://github.com/Kitsunp/SmolML/tree/main/smolml/models/nn)
+- [SmolML - Modelos de Árboles: ¡Decisiones, Decisiones!](https://github.com/Kitsunp/SmolML/tree/main/smolml/models/tree)
+- [SmolML - K-Means: ¡Encontrando Grupos en tus Datos!](https://github.com/Kitsunp/SmolML/tree/main/smolml/models/unsupervised)
+- [SmolML - Preprocesamiento: Haz que tus datos sean significativos](https://github.com/Kitsunp/SmolML/tree/main/smolml/preprocessing)
+- [SmolML - ¡El cuarto de utilidades!](https://github.com/Kitsunp/SmolML/tree/main/smolml/utils)
  
 ## ¿Por qué SmolML? La Filosofía 🎓
 
@@ -84,7 +96,7 @@ Seamos cristalinos: SmolML está construido para **aprender**, no para romper r�
 La mejor manera de usar SmolML es clonar este repositorio y explorar el código y ejemplos (si están disponibles).
 
 ```bash
-git clone https://github.com/Kitsunp/SmolML.git
+git clone https://github.com/rodmarkun/SmolML
 cd SmolML
 # ¡Explora el código en el directorio smolml/!
 ```
@@ -95,6 +107,7 @@ También puedes ejecutar las múltiples pruebas en la carpeta `tests/`. Solo ins
 cd tests
 pip install -r requirements.txt
 ```
+
 
 ## Contribuyendo
 
@@ -121,6 +134,5 @@ Si quieres apoyar SmolML, puedes:
 ### Apoyando la Traducción
 
 Si esta traducción al español te ha sido útil, también puedes:
-- **Seguir** a [@Kyokopom](https://x.com/Kyokopom) en X/Twitter
 - **Compartir** la versión en español con la comunidad hispanohablante
 - **Contribuir** mejorando la traducción si encuentras algo que se pueda perfeccionar
