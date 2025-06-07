@@ -96,7 +96,7 @@ Seamos cristalinos: SmolML está construido para **aprender**, no para romper r�
 La mejor manera de usar SmolML es clonar este repositorio y explorar el código y ejemplos (si están disponibles).
 
 ```bash
-git clone https://github.com/rodmarkun/SmolML
+git clone https://github.com/Kitsunp/SmolML.git
 cd SmolML
 # ¡Explora el código en el directorio smolml/!
 ```
