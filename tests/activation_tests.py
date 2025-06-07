@@ -147,4 +147,4 @@ class TestActivationsVsTensorflow(unittest.TestCase):
         self._compare_outputs(ml_result, tf_result)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main() 

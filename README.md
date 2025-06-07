@@ -1,108 +1,108 @@
-# SmolML: Machine Learning from Scratch, Made Clear! ✨
+# SmolML: Machine Learning desde Cero, ¡Hecho Claro! ✨
 
-**A pure Python machine learning library built entirely from the ground up for educational purposes. Made to understand how ML really works!**
+**Una librería de machine learning en Python puro construida completamente desde cero con fines educativos. ¡Creada para entender cómo funciona realmente el ML!**
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/c00b89e9-58a3-44d8-b9c3-4b47052eb150" width="600" alt="FlyLLM Logo">
+  <img src="https://github.com/user-attachments/assets/c00b89e9-58a3-44d8-b9c3-4b47052eb150" width="600" alt="Logo SmolML">
 </div>
 
 ---
 
-## What is SmolML? 🤔
+## ¿Qué es SmolML? 🤔
 
-Ever wondered what goes on *inside* those powerful machine learning libraries like Scikit-learn, PyTorch, or TensorFlow? How does a neural network *actually* learn? How is gradient descent implemented?
+¿Alguna vez te has preguntado qué sucede *dentro* de esas poderosas librerías de machine learning como Scikit-learn, PyTorch o TensorFlow? ¿Cómo *realmente* aprende una red neuronal? ¿Cómo se implementa el descenso de gradiente?
 
-SmolML is our answer! It's a fully functional (though simplified) machine learning library built using **only pure Python** and its basic `collections`, `random`, and `math` modules. No NumPy, no SciPy, no C++ extensions – just Python, all the way down.
+¡SmolML es nuestra respuesta! Es una librería de machine learning completamente funcional (aunque simplificada) construida usando **únicamente Python puro** y sus módulos básicos `collections`, `random` y `math`. Sin NumPy, sin SciPy, sin extensiones en C++ – solo Python, de principio a fin.
 
-The goal isn't to compete with production-grade libraries on speed or features, but to provide a **transparent, understandable, and educational** implementation of core machine learning concepts.
+El objetivo no es competir con las librerías de producción en velocidad o características, sino proporcionar una implementación **transparente, comprensible y educativa** de los conceptos fundamentales del machine learning.
 
-## Walkthrough 📖
+## Recorrido 📖
 
-You can read these guides of the different sections of SmolML in any order, though this list presents the recommended order for learning.
+Puedes leer estas guías de las diferentes secciones de SmolML en cualquier orden, aunque esta lista presenta el orden recomendado para el aprendizaje.
 
-- [SmolML - Core: Automatic Differentiation & N-Dimensional Arrays](https://github.com/rodmarkun/SmolML/tree/main/smolml/core)
-- [SmolML - Regression: Predicting Continuous Values](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/regression)
-- [SmolML - Neural Networks: Backpropagation to the limit](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/nn)
-- [SmolML - Tree Models: Decisions, Decisions!](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/tree)
-- [SmolML - K-Means: Finding Groups in Your Data!](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/unsupervised)
-- [SmolML - Preprocessing: Make your data meaningful](https://github.com/rodmarkun/SmolML/tree/main/smolml/preprocessing)
-- [SmolML - The utility room!](https://github.com/rodmarkun/SmolML/tree/main/smolml/utils)
+- [SmolML - Core: Diferenciación Automática y Arrays N-Dimensionales](https://github.com/rodmarkun/SmolML/tree/main/smolml/core)
+- [SmolML - Regresión: Prediciendo Valores Continuos](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/regression)
+- [SmolML - Redes Neuronales: Retropropagación al límite](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/nn)
+- [SmolML - Modelos de Árboles: ¡Decisiones, Decisiones!](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/tree)
+- [SmolML - K-Means: ¡Encontrando Grupos en tus Datos!](https://github.com/rodmarkun/SmolML/tree/main/smolml/models/unsupervised)
+- [SmolML - Preprocesamiento: Haz que tus datos sean significativos](https://github.com/rodmarkun/SmolML/tree/main/smolml/preprocessing)
+- [SmolML - ¡El cuarto de utilidades!](https://github.com/rodmarkun/SmolML/tree/main/smolml/utils)
  
-## Why SmolML? The Philosophy 🎓
+## ¿Por qué SmolML? La Filosofía 🎓
 
-We believe the best way to truly understand complex topics like machine learning is often to **build them yourself**. Production libraries are fantastic tools, but their internal complexity and optimizations can sometimes obscure the fundamental principles.
+Creemos que la mejor manera de entender verdaderamente temas complejos como el machine learning es a menudo **construirlos tú mismo**. Las librerías de producción son herramientas fantásticas, pero su complejidad interna y optimizaciones a veces pueden ocultar los principios fundamentales.
 
-SmolML strips away these layers to focus on the core ideas:
-* **Learning from First Principles:** Every major component is built from scratch, letting you trace the logic from basic operations to complex algorithms.
-* **Demystifying the Magic:** See how concepts like automatic differentiation (autograd), optimization algorithms, and model architectures are implemented in code.
-* **Minimal Dependencies:** Relying only on Python's standard library makes the codebase accessible and easy to explore without external setup hurdles.
-* **Focus on Clarity:** Code is written with understanding, not peak performance, as the primary goal.
+SmolML elimina estas capas para enfocarse en las ideas centrales:
+* **Aprender desde Primeros Principios:** Cada componente principal está construido desde cero, permitiéndote rastrear la lógica desde operaciones básicas hasta algoritmos complejos.
+* **Desmitificar la Magia:** Ver cómo conceptos como la diferenciación automática (autograd), algoritmos de optimización y arquitecturas de modelos están implementados en código.
+* **Dependencias Mínimas:** Depender solo de la librería estándar de Python hace que el código sea accesible y fácil de explorar sin obstáculos de configuración externa.
+* **Enfoque en la Claridad:** El código está escrito con comprensión, no rendimiento máximo, como objetivo principal.
 
-In order to learn as much as possible, we recommend reading through the guides, checking the code, and then trying to implement your own versions of these components.
+Para aprender tanto como sea posible, recomendamos leer las guías, revisar el código y luego intentar implementar tus propias versiones de estos componentes.
 
-## What's Inside? Features 🛠️
+## ¿Qué hay Dentro? Características 🛠️
 
-SmolML provides explains the essential building blocks for any ML library:
+SmolML explica los bloques de construcción esenciales para cualquier librería de ML:
 
-* **The Foundation: Custom Arrays & Autograd Engine:**
-    * **Automatic Differentiation (`Value`):** A simple autograd engine that tracks operations and computes gradients automatically – the heart of training neural networks!
-    * **N-dimensional Arrays (`MLArray`):** A custom array implementation inspired by NumPy, supporting common mathematical operations needed for ML. Extremely inefficient due to being written in Python, but ideal for understanding N-Dimensional Arrays.
+* **La Fundación: Arrays Personalizados y Motor de Autograd:**
+    * **Diferenciación Automática (`Value`):** Un motor de autograd simple que rastrea operaciones y calcula gradientes automáticamente – ¡el corazón del entrenamiento de redes neuronales!
+    * **Arrays N-dimensionales (`MLArray`):** Una implementación de array personalizada inspirada en NumPy, que soporta operaciones matemáticas comunes necesarias para ML. Extremadamente ineficiente por estar escrita en Python, pero ideal para entender Arrays N-Dimensionales.
 
-* **Essential Preprocessing:**
-    * **Scalers (`StandardScaler`, `MinMaxScaler`):** Fundamental tools to prepare your data, because algorithms tend to perform better when features are on a similar scale.
+* **Preprocesamiento Esencial:**
+    * **Escaladores (`StandardScaler`, `MinMaxScaler`):** Herramientas fundamentales para preparar tus datos, porque los algoritmos tienden a funcionar mejor cuando las características están en una escala similar.
 
-* **Build Your Own Neural Networks:**
-    * **Activation Functions:** Non-linearities like `relu`, `sigmoid`, `softmax`, `tanh` that allow networks to learn complex patterns. (See `smolml/utils/activation.py`)
-    * **Weight Initializers:** Smart strategies (`Xavier`, `He`) to set initial network weights for stable training. (See `smolml/utils/initializers.py`)
-    * **Loss Functions:** Ways to measure model error (`mse_loss`, `binary_cross_entropy`, `categorical_cross_entropy`). (See `smolml/utils/losses.py`)
-    * **Optimizers:** Algorithms like `SGD`, `Adam`, and `AdaGrad` that update model weights based on gradients to minimize loss. (See `smolml/utils/optimizers.py`)
+* **Construye tus Propias Redes Neuronales:**
+    * **Funciones de Activación:** No-linealidades como `relu`, `sigmoid`, `softmax`, `tanh` que permiten a las redes aprender patrones complejos. (Ver `smolml/utils/activation.py`)
+    * **Inicializadores de Pesos:** Estrategias inteligentes (`Xavier`, `He`) para establecer pesos iniciales de red para entrenamiento estable. (Ver `smolml/utils/initializers.py`)
+    * **Funciones de Pérdida:** Formas de medir el error del modelo (`mse_loss`, `binary_cross_entropy`, `categorical_cross_entropy`). (Ver `smolml/utils/losses.py`)
+    * **Optimizadores:** Algoritmos como `SGD`, `Adam` y `AdaGrad` que actualizan los pesos del modelo basándose en gradientes para minimizar la pérdida. (Ver `smolml/utils/optimizers.py`)
 
-* **Classic ML Models:**
-    * **Regression:** Implementations of `Linear` and `Polynomial` regression.
-    * **Neural Networks:** A flexible framework for building feed-forward neural networks.
-    * **Tree-Based Models:** `Decision Tree` and `Random Forest` implementations for classification and regression.
-    * **K-Means:** `KMeans` clustering algorithm for grouping similar data points together.
+* **Modelos ML Clásicos:**
+    * **Regresión:** Implementaciones de regresión `Lineal` y `Polinomial`.
+    * **Redes Neuronales:** Un framework flexible para construir redes neuronales feed-forward.
+    * **Modelos Basados en Árboles:** Implementaciones de `Árbol de Decisión` y `Bosque Aleatorio` para clasificación y regresión.
+    * **K-Means:** Algoritmo de clustering `KMeans` para agrupar puntos de datos similares.
 
-## Who is SmolML For? 🎯
+## ¿Para Quién es SmolML? 🎯
 
-* **Students:** Learning ML concepts for the first time.
-* **Developers:** Curious about the internals of ML libraries they use daily.
-* **Educators:** Looking for a simple, transparent codebase to demonstrate ML principles.
-* **Anyone:** Who enjoys learning by building!
+* **Estudiantes:** Aprendiendo conceptos de ML por primera vez.
+* **Desarrolladores:** Curiosos sobre el funcionamiento interno de las librerías de ML que usan diariamente.
+* **Educadores:** Buscando una base de código simple y transparente para demostrar principios de ML.
+* **Cualquier persona:** ¡Que disfrute aprender construyendo!
 
-## Limitations! ⚠️
+## ¡Limitaciones! ⚠️
 
-Let's be crystal clear: SmolML is built for **learning**, not for breaking speed records or handling massive datasets.
-* **Performance:** Being pure Python, it's WAAAY slower than libraries using optimized C/C++/Fortran backends (like NumPy).
-* **Scale:** It's best suited for small datasets and toy problems where understanding the mechanics is more important than computation time.
-* **Production Use:** **Do not** use SmolML for production applications. Stick to battle-tested libraries like Scikit-learn, PyTorch, TensorFlow, JAX, etc., for real-world tasks.
+Seamos cristalinos: SmolML está construido para **aprender**, no para romper récords de velocidad o manejar conjuntos de datos masivos.
+* **Rendimiento:** Al ser Python puro, es MUUUY más lento que librerías que usan backends optimizados en C/C++/Fortran (como NumPy).
+* **Escala:** Es más adecuado para conjuntos de datos pequeños y problemas de juguete donde entender la mecánica es más importante que el tiempo de cómputo.
+* **Uso en Producción:** **No** uses SmolML para aplicaciones de producción. Mantente con librerías probadas en batalla como Scikit-learn, PyTorch, TensorFlow, JAX, etc., para tareas del mundo real.
 
-Think of it as learning to build a go-kart engine from scratch before driving a Formula 1 car. It teaches you the fundamentals in a hands-on way!
+¡Piénsalo como aprender a construir un motor de go-kart desde cero antes de conducir un auto de Fórmula 1. Te enseña los fundamentos de manera práctica!
 
-## Getting Started
+## Comenzando
 
-The best way to use SmolML is to clone this repository and explore the code and examples (if available).
+La mejor manera de usar SmolML es clonar este repositorio y explorar el código y ejemplos (si están disponibles).
 
 ```bash
 git clone https://github.com/rodmarkun/SmolML
 cd SmolML
-# Explore the code in the smolml/ directory!
+# ¡Explora el código en el directorio smolml/!
 ```
 
-You can also run the multiple tests in the `tests/` folder. Just install the `requirements.txt` (this is for comparing SmolML against another standard libraries like TensorFlow, sklearn, etc, and generate plots with matplotlib).
+También puedes ejecutar las múltiples pruebas en la carpeta `tests/`. Solo instala el `requirements.txt` (esto es para comparar SmolML contra otras librerías estándar como TensorFlow, sklearn, etc., y generar gráficos con matplotlib).
 
 ```bash
 cd tests
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
-## Contributing
+## Contribuyendo
 
-Contributions are always welcome! If you're interested in contributing to SmolML, please fork the repository and create a new branch for your changes. When you're done with your changes, submit a pull request to merge your changes into the main branch.
+¡Las contribuciones siempre son bienvenidas! Si estás interesado en contribuir a SmolML, por favor haz fork del repositorio y crea una nueva rama para tus cambios. Cuando termines con tus cambios, envía un pull request para fusionar tus cambios en la rama principal.
 
-## Supporting SmolML
+## Apoyando SmolML
 
-If you want to support SmolML, you can:
-- **Star** :star: the project in Github!
-- **Donate** :coin: to my [Ko-fi](https://ko-fi.com/rodmarkun) page!
-- **Share** :heart: the project with your friends!
+Si quieres apoyar SmolML, puedes:
+- **Dar una estrella** :star: ¡al proyecto en Github!
+- **Donar** :coin: a mi página de [Ko-fi](https://ko-fi.com/rodmarkun)!
+- **Compartir** :heart: ¡el proyecto con tus amigos!
